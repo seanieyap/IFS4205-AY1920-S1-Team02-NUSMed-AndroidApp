@@ -11,4 +11,5 @@
     <string name="invalid_password">Enter a valid password</string>
     <string name="login_fail">Login failed</string>
     <string name="authenticating_text">Authenticating...</string>
+    <string name="scan_user_tag_helptext">Please scan your issued NFC tag</string>
 </resources>
