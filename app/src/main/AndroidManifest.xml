@@ -2,6 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.nusmedapplication">
 
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,11 +32,5 @@
             </intent-filter>
         </activity>
     </application>
-
-    <uses-feature
-        android:name="android.hardware.nfc"
-        android:required="true" />
-
-    <uses-permission android:name="android.permission.NFC" />
 
 </manifest>

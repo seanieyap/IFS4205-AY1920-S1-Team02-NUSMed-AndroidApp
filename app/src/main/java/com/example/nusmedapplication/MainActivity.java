@@ -8,6 +8,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -26,11 +27,16 @@ import static android.Manifest.permission.NFC;
 public class MainActivity extends AppCompatActivity {
 
     private static final int NFC_PERMISSION_REQUEST_CODE = 200;
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ensurePermissions();
+
+        //TODO: Initialise device ID / retrieve from enc shared pref if exists
 
         Button loginButton = findViewById(R.id.loginButton);
         loginButton.setOnClickListener(new View.OnClickListener() {
@@ -39,65 +45,76 @@ public class MainActivity extends AppCompatActivity {
                 processLogin();
             }
         });
-
-        // TODO: remove unnecessary toast notifications
-        // Check if app has permissions
-        if (!checkPermission()) {
-            Toast.makeText(getBaseContext(), "no permissions", Toast.LENGTH_LONG).show();
-            requestPermission();
-        }
     }
 
+    @Override
     public void onResume() {
         super.onResume();
-        NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
-        // Disable sound or vibration if tag discovered (only API 19 onwards)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            nfcAdapter.enableReaderMode(this,
-                    new NfcAdapter.ReaderCallback() {
-                        @Override
-                        public void onTagDiscovered(final Tag tag) {
-                            // do nothing
-                        }
-                    },
-                    NfcAdapter.FLAG_READER_NFC_A |
-                            NfcAdapter.FLAG_READER_NFC_B |
-                            NfcAdapter.FLAG_READER_NFC_F |
-                            NfcAdapter.FLAG_READER_NFC_V |
-                            NfcAdapter.FLAG_READER_NFC_BARCODE |
-                            NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS,
-                    null);
+        try {
+            NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+            // Disable sound or vibration if tag discovered (only API 19 onwards)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                nfcAdapter.enableReaderMode(this,
+                        new NfcAdapter.ReaderCallback() {
+                            @Override
+                            public void onTagDiscovered(final Tag tag) {
+                                // do nothing
+                            }
+                        },
+                        NfcAdapter.FLAG_READER_NFC_A |
+                                NfcAdapter.FLAG_READER_NFC_B |
+                                NfcAdapter.FLAG_READER_NFC_F |
+                                NfcAdapter.FLAG_READER_NFC_V |
+                                NfcAdapter.FLAG_READER_NFC_BARCODE |
+                                NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS,
+                        null);
+            }
+
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                    new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+            nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, null);
+
+        } catch (Exception e) {
+            Log.e(TAG, "An Exception occurred...", e);
         }
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-        nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, null);
     }
 
-    public void onPause() {
-        super.onPause();
-        NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        nfcAdapter.disableForegroundDispatch(this);
-    }
-
+    @Override
     public void onNewIntent(Intent intent) {
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction())) {
-            // drop NFC events
+            // Drop NFC events
         }
     }
 
-    private boolean checkPermission() {
-        // TODO: handle other permissions (camera, internet, etc)
-        int result = ContextCompat.checkSelfPermission(getApplicationContext(), NFC);
+    @Override
+    public void onPause() {
+        super.onPause();
 
+        try {
+            NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+            nfcAdapter.disableForegroundDispatch(this);
+        } catch (Exception e) {
+            Log.e(TAG, "An Exception occurred...", e);
+        }
+    }
+
+    private void ensurePermissions() {
+        if (!checkPermissions()) {
+            Toast.makeText(getBaseContext(),
+                    "No permissions... Requesting permissions...", Toast.LENGTH_LONG).show();
+            requestPermissions();
+        }
+    }
+
+    private boolean checkPermissions() {
+        int result = ContextCompat.checkSelfPermission(getApplicationContext(), NFC);
         return result == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void requestPermission() {
-
-        ActivityCompat.requestPermissions(this, new String[]{NFC},
-                NFC_PERMISSION_REQUEST_CODE);
+    private void requestPermissions() {
+        ActivityCompat.requestPermissions(this, new String[]{NFC}, NFC_PERMISSION_REQUEST_CODE);
     }
 
     @Override
@@ -105,27 +122,20 @@ public class MainActivity extends AppCompatActivity {
                                            String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case NFC_PERMISSION_REQUEST_CODE: {
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                    Toast.makeText(getBaseContext(), "permissions granted", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getBaseContext(),
+                            "Permissions granted!", Toast.LENGTH_LONG).show();
                 } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                    Toast.makeText(getBaseContext(), "permissions denied", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getBaseContext(),
+                            "Permissions denied...", Toast.LENGTH_LONG).show();
+                    finish();
                 }
-                return;
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request.
         }
     }
 
     public void processLogin() {
-
         Button loginButton = findViewById(R.id.loginButton);
         loginButton.setEnabled(false);
 
@@ -149,12 +159,10 @@ public class MainActivity extends AppCompatActivity {
             progressDialog.dismiss();
             onLoginFailed();
         }
-
     }
 
     public boolean validateInput() {
-
-        boolean valid = true;
+        boolean valid = false;
 
         EditText nricInput = findViewById(R.id.nricField);
         EditText passwordInput = findViewById(R.id.passwordField);
@@ -168,16 +176,17 @@ public class MainActivity extends AppCompatActivity {
 
         if (nric.isEmpty() || !matcher.matches()) {
             nricInput.setError(getString(R.string.invalid_nric));
-            valid = false;
         } else {
             nricInput.setError(null);
+            valid = true;
         }
 
+        // TODO: Validate password length
         if (password.isEmpty() || password.length() < 5) {
             passwordInput.setError(getString(R.string.invalid_password));
-            valid = false;
         } else {
             passwordInput.setError(null);
+            valid = true;
         }
 
         return valid;
@@ -202,7 +211,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onLoginSuccess() {
-        // TODO: go to next activity (Scan NFC)
         Toast.makeText(getBaseContext(), "Login successful", Toast.LENGTH_LONG).show();
 
         Intent intent = new Intent(this, NfcScanActivity.class);
@@ -210,7 +218,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onLoginFailed() {
-
         Toast.makeText(getBaseContext(), R.string.login_fail, Toast.LENGTH_LONG).show();
 
         Button loginButton = findViewById(R.id.loginButton);
