@@ -3,6 +3,7 @@ package com.example.nusmedapplication;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
@@ -13,12 +14,15 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
 
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,7 +40,29 @@ public class MainActivity extends AppCompatActivity {
 
         ensurePermissions();
 
-        //TODO: Initialise device ID / retrieve from enc shared pref if exists
+        try {
+            String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+
+            SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
+                    "secret_shared_prefs",
+                    masterKeyAlias,
+                    getApplicationContext(),
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+
+            String retrievedDeviceID = sharedPreferences.getString("deviceID", null);
+
+            if (retrievedDeviceID == null) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                String deviceID = UUID.randomUUID().toString();
+                editor.putString("deviceID", deviceID);
+                editor.apply();
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "An Exception occurred...", e);
+        }
 
         Button loginButton = findViewById(R.id.loginButton);
         loginButton.setOnClickListener(new View.OnClickListener() {

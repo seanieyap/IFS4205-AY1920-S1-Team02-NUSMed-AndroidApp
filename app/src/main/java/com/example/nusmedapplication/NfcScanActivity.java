@@ -1,9 +1,12 @@
 package com.example.nusmedapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.MifareUltralight;
@@ -49,6 +52,30 @@ public class NfcScanActivity extends AppCompatActivity {
         Intent nfcIntent = new Intent(this, getClass());
         nfcIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         nfcPendingIntent = PendingIntent.getActivity(this, 0, nfcIntent, 0);
+
+        try {
+            String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+
+            SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
+                    "secret_shared_prefs",
+                    masterKeyAlias,
+                    getApplicationContext(),
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+
+            String deviceID = sharedPreferences.getString("deviceID", null);
+
+            if (deviceID == null) {
+                Toast.makeText(this, "No device ID found!", Toast.LENGTH_LONG).show();
+                finish();
+            } else {
+                Toast.makeText(this, deviceID, Toast.LENGTH_LONG).show();
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "An Exception occurred...", e);
+        }
     }
 
     @Override
