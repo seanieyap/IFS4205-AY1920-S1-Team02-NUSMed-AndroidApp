@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,6 +23,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -170,21 +175,10 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this,
-                R.style.Theme_AppCompat_DayNight_Dialog);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setCancelable(false);
-        progressDialog.setCanceledOnTouchOutside(false);
-        progressDialog.setMessage(getString(R.string.authenticating_text));
-        progressDialog.show();
-
-        if (authenticateInput()) {
-            progressDialog.dismiss();
-            onLoginSuccess();
-        } else {
-            progressDialog.dismiss();
-            onLoginFailed();
-        }
+        // TODO: Fix error causing next activity to not be shown
+        onLoginSuccess();
+        //LoginTask loginTask = new LoginTask();
+        //loginTask.execute();
     }
 
     public boolean validateInput() {
@@ -219,18 +213,53 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean authenticateInput() {
-        // TODO: Implement authentication logic
-        // hash pass, make login call to server
-        // deal with timeout/ no internet connection
+        // TODO: Remove unnecessary logs
         boolean authenticated = false;
 
         EditText nricInput = findViewById(R.id.nricField);
         EditText passwordInput = findViewById(R.id.passwordField);
         String nric = nricInput.getText().toString();
         String password = passwordInput.getText().toString();
+        try {
+            URL url = new URL("http://192.168.1.8:44320/api/account/authenticate/password");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; utf-8");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoOutput(true);
 
-        if ("admin".equals(nric) && "admin".equals(password)) {
-            authenticated = true;
+            String jsonCredentialsString = String.format("{'nric': '%s', 'password': '%s'}",
+                    nric, password);
+            Log.i(TAG, jsonCredentialsString);
+
+            OutputStream os = conn.getOutputStream();
+            byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
+            os.write(jsonCredentialsBytes, 0, jsonCredentialsBytes.length);
+
+            int responseCode = conn.getResponseCode();
+            Log.i(TAG, Integer.toString(responseCode));
+
+            switch (responseCode) {
+                case 200:
+                    authenticated = true;
+                    break;
+                case 401:
+                    break;
+                default:
+                    break;
+            }
+
+            /*BufferedReader br = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream(), "utf-8"));
+            StringBuilder response = new StringBuilder();
+            String responseLine = null;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }*/
+
+        } catch (Exception e) {
+            Log.e(TAG, "An Exception occurred...", e);
+            // Deal with timeout/ no internet connection
         }
 
         return authenticated;
@@ -239,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
     public void onLoginSuccess() {
         Toast.makeText(getBaseContext(), "Login successful", Toast.LENGTH_LONG).show();
 
-        Intent intent = new Intent(this, NfcScanActivity.class);
+        Intent intent = new Intent(getApplicationContext(), NfcScanActivity.class);
         startActivity(intent);
     }
 
@@ -248,6 +277,37 @@ public class MainActivity extends AppCompatActivity {
 
         Button loginButton = findViewById(R.id.loginButton);
         loginButton.setEnabled(true);
+    }
+
+    private class LoginTask extends AsyncTask<String, Void, Boolean> {
+
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(MainActivity.this);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setMessage(getString(R.string.authenticating_text));
+            progressDialog.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            return authenticateInput();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean authenticated) {
+            if (authenticated) {
+                progressDialog.dismiss();
+                onLoginSuccess();
+            } else {
+                progressDialog.dismiss();
+                onLoginFailed();
+            }
+        }
     }
 
 }
