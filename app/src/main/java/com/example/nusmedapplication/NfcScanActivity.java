@@ -16,6 +16,8 @@ import android.nfc.tech.MifareUltralight;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,7 +31,7 @@ public class NfcScanActivity extends AppCompatActivity {
     private static final int MULTIPLE_PERMISSION_REQUEST_CODE = 200;
     private static final String TAG = "NfcScanActivity";
 
-    private TextView mText;
+    private TextView scanNfcHelpText;
     private NfcAdapter nfcAdapter;
     private PendingIntent nfcPendingIntent;
 
@@ -85,8 +87,17 @@ public class NfcScanActivity extends AppCompatActivity {
             Log.e(TAG, "An Exception occurred...", e);
         }
 
-        mText = findViewById(R.id.text);
-        mText.setText(R.string.scan_user_tag_helptext);
+        scanNfcHelpText = findViewById(R.id.scanNfcHelpText);
+        scanNfcHelpText.setText(R.string.scan_user_tag_helptext);
+
+        Button cancelButton = findViewById(R.id.scanNfcCancelButton);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -108,7 +119,7 @@ public class NfcScanActivity extends AppCompatActivity {
             // Read from page 6 of the NFC tag as the tag's unique ID is stored there
             byte[] uniqueIdBytes = nfcTag.readPages(6);
 
-            mText.setText("Tag ID: " + encodeHexString(uniqueIdBytes));
+            scanNfcHelpText.setText("Tag ID: " + encodeHexString(uniqueIdBytes));
             Toast.makeText(getBaseContext(), "Scan successful!", Toast.LENGTH_LONG).show();
 
             //TODO: Retrieve device ID, send device ID + tag ID to server to authenticate user, go to next activity
