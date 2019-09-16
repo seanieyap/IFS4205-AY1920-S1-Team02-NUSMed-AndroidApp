@@ -12,6 +12,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -19,14 +23,9 @@ import androidx.core.content.ContextCompat;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
-
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.regex.Matcher;
