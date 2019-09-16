@@ -138,6 +138,12 @@ public class NfcScanActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        // The following line is commented out to disable back press
+        // super.onBackPressed();
+    }
+
     private boolean checkPermissions() {
         int result = ContextCompat.checkSelfPermission(getApplicationContext(), NFC);
         result ^= ContextCompat.checkSelfPermission(getApplicationContext(), CAMERA);
@@ -182,6 +188,4 @@ public class NfcScanActivity extends AppCompatActivity {
         }
         return hexStringBuilder.toString();
     }
-
-    // TODO: disable back navigation
 }
