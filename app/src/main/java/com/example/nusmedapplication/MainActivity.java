@@ -49,6 +49,23 @@ public class MainActivity extends AppCompatActivity {
 
         ensurePermissions();
 
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+        // Check if the smartphone has NFC
+        if (nfcAdapter == null) {
+            Toast.makeText(this,
+                    "This device does not support NFC.\n The application will not work correctly.",
+                    Toast.LENGTH_LONG).show();
+        }
+
+        // Check if NFC is enabled
+        if (nfcAdapter != null && !nfcAdapter.isEnabled()) {
+            Toast.makeText(this, "Enable NFC before using the app", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent();
+            intent.setAction(Settings.ACTION_WIRELESS_SETTINGS);
+            startActivity(intent);
+        }
+
         try {
             String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
 
@@ -80,19 +97,13 @@ public class MainActivity extends AppCompatActivity {
                 processLogin();
             }
         });
-
-        /*Intent intent = new Intent();
-        intent.setAction(Settings.ACTION_WIRELESS_SETTINGS);
-        startActivity(intent);*/
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        try {
-            NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-
+        if (nfcAdapter != null) {
             // Disable sound or vibration if tag discovered (only API 19 onwards)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 nfcAdapter.enableReaderMode(this,
@@ -114,9 +125,6 @@ public class MainActivity extends AppCompatActivity {
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
                     new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
             nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, null);
-
-        } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
         }
     }
 
@@ -130,12 +138,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-
-        try {
-            NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        if (nfcAdapter != null) {
             nfcAdapter.disableForegroundDispatch(this);
-        } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
         }
     }
 
