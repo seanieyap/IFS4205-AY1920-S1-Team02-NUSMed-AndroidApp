@@ -6,10 +6,12 @@
     <string name="nric_field_helptext">S1234567Z</string>
     <string name="password_field_helptext">Password</string>
     <string name="nric_text">NRIC</string>
-    <string name="forgot_password_text">Forgot your password? Click here</string>
+    <string name="forgot_password_text">Please approach help-desk to reset forgotten passwords.</string>
     <string name="invalid_nric">Enter a valid NRIC</string>
     <string name="invalid_password">Enter a valid password</string>
     <string name="login_fail">Login failed</string>
     <string name="authenticating_text">Authenticating...</string>
-    <string name="scan_user_tag_helptext">Please scan your issued NFC tag</string>
+    <string name="scan_user_tag_helptext">Hold your phone near the NFC tag.</string>
+    <string name="scan_nfc_text">Scan Your Issued NFC Tag</string>
+    <string name="cancel_text">Cancel</string>
 </resources>

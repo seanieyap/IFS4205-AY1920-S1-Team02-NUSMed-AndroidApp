@@ -1,4 +1,4 @@
-# IFS4205-AY19-20-S1-Team02-NUSMed-AndroidApp
+# IFS4205-AY19/20-S1-Team02-NUSMed-AndroidApp
 
 ## Setup
 
