@@ -10,6 +10,7 @@ import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,12 +32,15 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.NFC;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int NFC_PERMISSION_REQUEST_CODE = 200;
+    private static final int MULTIPLE_PERMISSION_REQUEST_CODE = 200;
     private static final String TAG = "MainActivity";
+
+    private NfcAdapter nfcAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +80,10 @@ public class MainActivity extends AppCompatActivity {
                 processLogin();
             }
         });
+
+        /*Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_WIRELESS_SETTINGS);
+        startActivity(intent);*/
     }
 
     @Override
@@ -115,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onNewIntent(Intent intent) {
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction())) {
-            // Drop NFC events
+            // Intentionally left empty to drop NFC events
         }
     }
 
@@ -133,34 +141,35 @@ public class MainActivity extends AppCompatActivity {
 
     private void ensurePermissions() {
         if (!checkPermissions()) {
-            Toast.makeText(getBaseContext(),
-                    "No permissions... Requesting permissions...", Toast.LENGTH_LONG).show();
             requestPermissions();
         }
     }
 
     private boolean checkPermissions() {
         int result = ContextCompat.checkSelfPermission(getApplicationContext(), NFC);
+        result ^= ContextCompat.checkSelfPermission(getApplicationContext(), CAMERA);
         return result == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestPermissions() {
-        ActivityCompat.requestPermissions(this, new String[]{NFC}, NFC_PERMISSION_REQUEST_CODE);
+        // Runtime permissions only work API 23 onwards
+        ActivityCompat.requestPermissions(this, new String[]{CAMERA, NFC},
+                MULTIPLE_PERMISSION_REQUEST_CODE);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions, int[] grantResults) {
         switch (requestCode) {
-            case NFC_PERMISSION_REQUEST_CODE: {
+            case MULTIPLE_PERMISSION_REQUEST_CODE: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(getBaseContext(),
-                            "Permissions granted!", Toast.LENGTH_LONG).show();
+                            "All required permissions granted!", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(getBaseContext(),
-                            "Permissions denied...", Toast.LENGTH_LONG).show();
-                    finish();
+                            "This application requires the requested permissions to be granted!",
+                            Toast.LENGTH_LONG).show();
                 }
             }
         }
@@ -170,15 +179,14 @@ public class MainActivity extends AppCompatActivity {
         Button loginButton = findViewById(R.id.loginButton);
         loginButton.setEnabled(false);
 
-        if (!validateInput()) {
+        if (validateInput()) {
+            // TODO: Fix error causing next activity to not be shown
+            //onLoginSuccess();
+            LoginTask loginTask = new LoginTask();
+            loginTask.execute();
+        } else {
             onLoginFailed();
-            return;
         }
-
-        // TODO: Fix error causing next activity to not be shown
-        onLoginSuccess();
-        //LoginTask loginTask = new LoginTask();
-        //loginTask.execute();
     }
 
     public boolean validateInput() {
@@ -201,8 +209,7 @@ public class MainActivity extends AppCompatActivity {
             valid = true;
         }
 
-        // TODO: Validate password length
-        if (password.isEmpty() || password.length() < 5) {
+        if (password.isEmpty() || password.length() < 12) {
             passwordInput.setError(getString(R.string.invalid_password));
         } else {
             passwordInput.setError(null);
@@ -221,7 +228,10 @@ public class MainActivity extends AppCompatActivity {
         String nric = nricInput.getText().toString();
         String password = passwordInput.getText().toString();
         try {
-            URL url = new URL("http://192.168.1.8:44320/api/account/authenticate/password");
+            // TODO: Remove unused URL link
+            //URL url = new URL("http://192.168.1.8:44320/api/account/authenticate/password");
+            URL url = new
+                    URL("https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/password");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; utf-8");
