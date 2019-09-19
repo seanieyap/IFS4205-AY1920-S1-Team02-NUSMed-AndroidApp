@@ -7,21 +7,26 @@ import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.MifareUltralight;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.NFC;
@@ -29,11 +34,13 @@ import static android.Manifest.permission.NFC;
 public class NfcScanActivity extends AppCompatActivity {
 
     private static final int MULTIPLE_PERMISSION_REQUEST_CODE = 200;
-    private static final String TAG = "NfcScanActivity";
+    private static final String TAG = "DEBUG - NfcScanActivity";
 
-    private TextView scanNfcHelpText;
     private NfcAdapter nfcAdapter;
     private PendingIntent nfcPendingIntent;
+    private String retrievedDeviceID = null;
+    private String retrievedNric = null;
+    private String retrievedPass = null;
 
     @Override
     public void onCreate(Bundle savedState) {
@@ -42,59 +49,15 @@ public class NfcScanActivity extends AppCompatActivity {
 
         ensurePermissions();
 
-        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        checkNfc();
 
-        // Check if the smartphone has NFC
-        if (nfcAdapter == null) {
-            Toast.makeText(this,
-                    "This device does not support NFC.\n The application will not work correctly.",
-                    Toast.LENGTH_LONG).show();
-        }
-
-        // Check if NFC is enabled
-        if (nfcAdapter != null && !nfcAdapter.isEnabled()) {
-            Toast.makeText(this, "Enable NFC before using the app", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent();
-            intent.setAction(Settings.ACTION_WIRELESS_SETTINGS);
-            startActivity(intent);
-        }
-
-        Intent nfcIntent = new Intent(this, getClass());
-        nfcIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        nfcPendingIntent = PendingIntent.getActivity(this, 0, nfcIntent, 0);
-
-        try {
-            String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
-
-            SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
-                    "secret_shared_prefs",
-                    masterKeyAlias,
-                    getApplicationContext(),
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            );
-
-            String deviceID = sharedPreferences.getString("deviceID", null);
-
-            if (deviceID == null) {
-                Toast.makeText(this, "No device ID found!", Toast.LENGTH_LONG).show();
-                finish();
-            } else {
-                Toast.makeText(this, deviceID, Toast.LENGTH_LONG).show();
-            }
-
-        } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
-        }
-
-        scanNfcHelpText = findViewById(R.id.scanNfcHelpText);
-        scanNfcHelpText.setText(R.string.scan_user_tag_helptext);
+        retrieveStoredData();
 
         Button cancelButton = findViewById(R.id.scanNfcCancelButton);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
                 startActivity(intent);
             }
         });
@@ -118,9 +81,10 @@ public class NfcScanActivity extends AppCompatActivity {
 
             // Read from page 6 of the NFC tag as the tag's unique ID is stored there
             byte[] uniqueIdBytes = nfcTag.readPages(6);
+            Log.d(TAG, "Scanned Tag ID: " + encodeHexString(uniqueIdBytes));
 
-            scanNfcHelpText.setText("Tag ID: " + encodeHexString(uniqueIdBytes));
-            Toast.makeText(getBaseContext(), "Scan successful!", Toast.LENGTH_LONG).show();
+            AuthenticateTask authenticateTask = new AuthenticateTask();
+            authenticateTask.execute();
 
             //TODO: Retrieve device ID, send device ID + tag ID to server to authenticate user, go to next activity
 
@@ -143,16 +107,16 @@ public class NfcScanActivity extends AppCompatActivity {
         }
     }
 
-    private void ensurePermissions() {
-        if (!checkPermissions()) {
-            requestPermissions();
-        }
-    }
-
     @Override
     public void onBackPressed() {
         // The following line is commented out to disable back press
         // super.onBackPressed();
+    }
+
+    private void ensurePermissions() {
+        if (!checkPermissions()) {
+            requestPermissions();
+        }
     }
 
     private boolean checkPermissions() {
@@ -185,18 +149,158 @@ public class NfcScanActivity extends AppCompatActivity {
         }
     }
 
-    public String byteToHex(byte num) {
+    private void checkNfc() {
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+        // Check if the smartphone has NFC
+        if (nfcAdapter == null) {
+            Toast.makeText(this,
+                    "This device does not support NFC.\n The application will not work correctly.",
+                    Toast.LENGTH_LONG).show();
+        }
+
+        // Check if NFC is enabled
+        if (nfcAdapter != null && !nfcAdapter.isEnabled()) {
+            Toast.makeText(this, "Enable NFC before using the app", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent();
+            intent.setAction(Settings.ACTION_WIRELESS_SETTINGS);
+            startActivity(intent);
+        }
+
+        Intent nfcIntent = new Intent(this, getClass());
+        nfcIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        nfcPendingIntent = PendingIntent.getActivity(this, 0, nfcIntent, 0);
+    }
+
+    private void retrieveStoredData() {
+        try {
+            String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+
+            SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
+                    "secret_shared_prefs",
+                    masterKeyAlias,
+                    getApplicationContext(),
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+
+            retrievedDeviceID = sharedPreferences.getString("deviceID", null);
+            Log.d(TAG, "Device ID: " + retrievedDeviceID);
+
+            Intent intent = getIntent();
+            String scanNfcPurpose = intent.getStringExtra("scanNfcPurpose");
+            Log.d(TAG, "Scan NFC Purpose: " + scanNfcPurpose);
+
+            if ("registerDevice".equals(scanNfcPurpose)) {
+                retrievedNric = intent.getStringExtra("nric");
+                retrievedPass = intent.getStringExtra("password");
+            }
+
+            if ("webLogin".equals(scanNfcPurpose)) {
+                retrievedNric = sharedPreferences.getString("nric", null);
+                retrievedPass = sharedPreferences.getString("password", null);
+            }
+
+            Log.d(TAG, "NRIC: " + retrievedNric + " , Password: " + retrievedPass);
+
+        } catch (Exception e) {
+            Log.e(TAG, "An Exception occurred...", e);
+        }
+    }
+
+    private String byteToHex(byte num) {
         char[] hexDigits = new char[2];
         hexDigits[0] = Character.forDigit((num >> 4) & 0xF, 16);
         hexDigits[1] = Character.forDigit((num & 0xF), 16);
         return new String(hexDigits);
     }
 
-    public String encodeHexString(byte[] byteArray) {
+    private String encodeHexString(byte[] byteArray) {
         StringBuilder hexStringBuilder = new StringBuilder();
         for (byte byteToConvert : byteArray) {
             hexStringBuilder.append(byteToHex(byteToConvert));
         }
         return hexStringBuilder.toString();
+    }
+
+    private boolean authenticateData() {
+        boolean authenticated = false;
+        String deviceID = retrievedDeviceID;
+        String nric = retrievedNric;
+        String password = retrievedPass;
+
+        try {
+            URL url = new
+                    URL("https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/password");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; utf-8");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoOutput(true);
+
+            String jsonCredentialsString = String.format("{'nric': '%s', 'password': '%s'}",
+                    nric, password);
+            Log.d(TAG, jsonCredentialsString);
+
+            OutputStream os = conn.getOutputStream();
+            byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
+            os.write(jsonCredentialsBytes, 0, jsonCredentialsBytes.length);
+
+            int responseCode = conn.getResponseCode();
+            Log.d(TAG, Integer.toString(responseCode));
+
+            switch (responseCode) {
+                case 200:
+                    authenticated = true;
+                    break;
+                case 401:
+                    break;
+                default:
+                    break;
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "An Exception occurred...", e);
+            // Deal with timeout/ no internet connection
+        }
+
+        return authenticated;
+    }
+
+    private class AuthenticateTask extends AsyncTask<String, Void, Boolean> {
+
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(NfcScanActivity.this);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setMessage(getString(R.string.authenticating_text));
+            progressDialog.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            return authenticateData();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean authenticated) {
+            if (authenticated) {
+                progressDialog.dismiss();
+                Log.d(TAG, "Authentication SUCCESS! Start HOME activity!");
+                // TODO: Start HOME activity
+                Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
+                startActivity(intent);
+            } else {
+                progressDialog.dismiss();
+                Log.d(TAG, "Authentication FAILED! Start AUTHENTICATE activity!");
+                Toast.makeText(getBaseContext(), R.string.authentication_fail, Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
+                startActivity(intent);
+            }
+        }
     }
 }
