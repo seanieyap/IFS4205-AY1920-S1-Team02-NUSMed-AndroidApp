@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -82,7 +83,7 @@ public class NfcScanActivity extends AppCompatActivity {
 
             // Read from page 6 of the NFC tag as the tag's unique ID is stored there
             byte[] uniqueIdBytes = nfcTag.readPages(6);
-            uniqueIdString = encodeHexString(uniqueIdBytes);
+            uniqueIdString = Base64.encodeToString(uniqueIdBytes, Base64.DEFAULT);
             Log.d(TAG, "Scanned Tag ID: " + uniqueIdString);
 
             AuthenticateTask authenticateTask = new AuthenticateTask();
@@ -206,21 +207,6 @@ public class NfcScanActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, "An Exception occurred...", e);
         }
-    }
-
-    private String byteToHex(byte num) {
-        char[] hexDigits = new char[2];
-        hexDigits[0] = Character.forDigit((num >> 4) & 0xF, 16);
-        hexDigits[1] = Character.forDigit((num & 0xF), 16);
-        return new String(hexDigits);
-    }
-
-    private String encodeHexString(byte[] byteArray) {
-        StringBuilder hexStringBuilder = new StringBuilder();
-        for (byte byteToConvert : byteArray) {
-            hexStringBuilder.append(byteToHex(byteToConvert));
-        }
-        return hexStringBuilder.toString();
     }
 
     private boolean authenticateData() {
