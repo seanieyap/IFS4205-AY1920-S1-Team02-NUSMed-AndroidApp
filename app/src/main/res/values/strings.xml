@@ -10,9 +10,13 @@
     <string name="invalid_nric">Enter a valid NRIC</string>
     <string name="invalid_password">Enter a valid password</string>
     <string name="authentication_fail">Authentication failed!</string>
+    <string name="authentication_success">Authentication successful!</string>
     <string name="authenticating_text">Authenticating...</string>
     <string name="scan_user_tag_helptext">Hold your phone near the NFC tag.</string>
     <string name="scan_nfc_text">Scan Your Issued NFC Tag</string>
     <string name="cancel_text">Cancel</string>
     <string name="loading_text">Loading...</string>
+    <string name="weblogin_button">Web Login</string>
+    <string name="weblogin_success">Web login successful!</string>
+    <string name="select_role_button">Select Role</string>
 </resources>

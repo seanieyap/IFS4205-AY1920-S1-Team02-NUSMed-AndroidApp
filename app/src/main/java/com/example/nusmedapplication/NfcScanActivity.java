@@ -41,6 +41,8 @@ public class NfcScanActivity extends AppCompatActivity {
     private String retrievedDeviceID = null;
     private String retrievedNric = null;
     private String retrievedPass = null;
+    private String scanNfcPurpose = null;
+    private String uniqueIdString = null;
 
     @Override
     public void onCreate(Bundle savedState) {
@@ -57,8 +59,7 @@ public class NfcScanActivity extends AppCompatActivity {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
-                startActivity(intent);
+                finish();
             }
         });
     }
@@ -81,12 +82,11 @@ public class NfcScanActivity extends AppCompatActivity {
 
             // Read from page 6 of the NFC tag as the tag's unique ID is stored there
             byte[] uniqueIdBytes = nfcTag.readPages(6);
-            Log.d(TAG, "Scanned Tag ID: " + encodeHexString(uniqueIdBytes));
+            uniqueIdString = encodeHexString(uniqueIdBytes);
+            Log.d(TAG, "Scanned Tag ID: " + uniqueIdString);
 
             AuthenticateTask authenticateTask = new AuthenticateTask();
             authenticateTask.execute();
-
-            //TODO: Retrieve device ID, send device ID + tag ID to server to authenticate user, go to next activity
 
         } catch (IOException e) {
             Log.e(TAG, "IOException while writing MifareUltralight...", e);
@@ -188,7 +188,7 @@ public class NfcScanActivity extends AppCompatActivity {
             Log.d(TAG, "Device ID: " + retrievedDeviceID);
 
             Intent intent = getIntent();
-            String scanNfcPurpose = intent.getStringExtra("scanNfcPurpose");
+            scanNfcPurpose = intent.getStringExtra("scanNfcPurpose");
             Log.d(TAG, "Scan NFC Purpose: " + scanNfcPurpose);
 
             if ("registerDevice".equals(scanNfcPurpose)) {
@@ -228,10 +228,19 @@ public class NfcScanActivity extends AppCompatActivity {
         String deviceID = retrievedDeviceID;
         String nric = retrievedNric;
         String password = retrievedPass;
+        String uniqueID = uniqueIdString;
+        String urlString = null;
+
+        if ("registerDevice".equals(scanNfcPurpose)) {
+            urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/password";
+            //urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/register";
+        } else if ("webLogin".equals(scanNfcPurpose)) {
+            urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/password";
+            //urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/weblogin";
+        }
 
         try {
-            URL url = new
-                    URL("https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/password");
+            URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -291,8 +300,38 @@ public class NfcScanActivity extends AppCompatActivity {
             if (authenticated) {
                 progressDialog.dismiss();
                 Log.d(TAG, "Authentication SUCCESS! Start HOME activity!");
-                // TODO: Start HOME activity
-                Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
+
+                if ("registerDevice".equals(scanNfcPurpose)) {
+                    Toast.makeText(getBaseContext(), R.string.authentication_success, Toast.LENGTH_LONG).show();
+
+                    try {
+                        String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+
+                        SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
+                                "secret_shared_prefs",
+                                masterKeyAlias,
+                                getApplicationContext(),
+                                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                        );
+
+
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("nric", retrievedNric);
+                        editor.putString("password", retrievedPass);
+                        editor.apply();
+
+                        Log.d(TAG, "Saved (NRIC: " + retrievedNric + " , Password: " + retrievedPass + ")");
+
+                    } catch (Exception e) {
+                        Log.e(TAG, "An Exception occurred...", e);
+                    }
+
+                } else if ("webLogin".equals(scanNfcPurpose)) {
+                    Toast.makeText(getBaseContext(), R.string.weblogin_success, Toast.LENGTH_LONG).show();
+                }
+
+                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                 startActivity(intent);
             } else {
                 progressDialog.dismiss();

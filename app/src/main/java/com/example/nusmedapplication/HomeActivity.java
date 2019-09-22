@@ -8,39 +8,34 @@ import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.NFC;
 
-public class AuthenticateActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity {
 
     private static final int MULTIPLE_PERMISSION_REQUEST_CODE = 200;
-    private static final String TAG = "DEBUG - AuthenticateActivity";
+    private static final String TAG = "DEBUG - HomeActivity";
 
     private NfcAdapter nfcAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_authenticate);
+        setContentView(R.layout.activity_home);
 
         ensurePermissions();
 
         checkNfc();
 
-        Button button = findViewById(R.id.authenticateButton);
+        Button button = findViewById(R.id.webLoginButton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -155,46 +150,8 @@ public class AuthenticateActivity extends AppCompatActivity {
     }
 
     private void callNfcScan() {
-        EditText nricInput = findViewById(R.id.nricField);
-        EditText passwordInput = findViewById(R.id.passwordField);
-        String nric = nricInput.getText().toString();
-        String password = passwordInput.getText().toString();
-
-        if (validateInput()) {
-            Intent intent = new Intent(getApplicationContext(), NfcScanActivity.class);
-            intent.putExtra("nric", nric);
-            intent.putExtra("password", password);
-            intent.putExtra("scanNfcPurpose", "registerDevice");
-            startActivity(intent);
-        }
-    }
-
-    private boolean validateInput() {
-        boolean valid = false;
-
-        EditText nricInput = findViewById(R.id.nricField);
-        EditText passwordInput = findViewById(R.id.passwordField);
-        String nric = nricInput.getText().toString();
-        String password = passwordInput.getText().toString();
-
-        // Regex to check if string is alphanumeric
-        String regex = "^[a-zA-Z0-9]+$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(nric);
-
-        if (nric.isEmpty() || !matcher.matches()) {
-            nricInput.setError(getString(R.string.invalid_nric));
-        } else {
-            nricInput.setError(null);
-        }
-
-        if (password.isEmpty() || password.length() < 12) {
-            passwordInput.setError(getString(R.string.invalid_password));
-        } else {
-            passwordInput.setError(null);
-            valid = true;
-        }
-
-        return valid;
+        Intent intent = new Intent(getApplicationContext(), NfcScanActivity.class);
+        intent.putExtra("scanNfcPurpose", "webLogin");
+        startActivity(intent);
     }
 }

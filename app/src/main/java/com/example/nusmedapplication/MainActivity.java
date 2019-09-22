@@ -141,8 +141,7 @@ public class MainActivity extends AppCompatActivity {
             if (authenticated) {
                 progressDialog.dismiss();
                 Log.d(TAG, "Authentication SUCCESS! Start HOME activity!");
-                // TODO: Start HOME activity
-                Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
+                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                 startActivity(intent);
             } else {
                 progressDialog.dismiss();
