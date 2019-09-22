@@ -88,8 +88,9 @@ public class MainActivity extends AppCompatActivity {
             conn.setRequestProperty("Accept", "application/json");
             conn.setDoOutput(true);
 
-            String jsonCredentialsString = String.format("{'nric': '%s', 'password': '%s'}",
-                    nric, password);
+            String jsonCredentialsString = String.format(
+                    "{'nric': '%s', 'password': '%s', 'deviceID': '%s'}",
+                    nric, password, deviceID);
             Log.d(TAG, jsonCredentialsString);
 
             OutputStream os = conn.getOutputStream();

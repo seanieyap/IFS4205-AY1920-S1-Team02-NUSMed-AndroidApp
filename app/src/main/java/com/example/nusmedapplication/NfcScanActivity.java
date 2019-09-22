@@ -83,7 +83,7 @@ public class NfcScanActivity extends AppCompatActivity {
 
             // Read from page 6 of the NFC tag as the tag's unique ID is stored there
             byte[] uniqueIdBytes = nfcTag.readPages(6);
-            uniqueIdString = Base64.encodeToString(uniqueIdBytes, Base64.DEFAULT);
+            uniqueIdString = Base64.encodeToString(uniqueIdBytes, Base64.DEFAULT).trim();
             Log.d(TAG, "Scanned Tag ID: " + uniqueIdString);
 
             AuthenticateTask authenticateTask = new AuthenticateTask();
@@ -214,15 +214,15 @@ public class NfcScanActivity extends AppCompatActivity {
         String deviceID = retrievedDeviceID;
         String nric = retrievedNric;
         String password = retrievedPass;
-        String uniqueID = uniqueIdString;
+        String tokenID = uniqueIdString;
         String urlString = null;
 
         if ("registerDevice".equals(scanNfcPurpose)) {
-            urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/password";
-            //urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/register";
+            //urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/password";
+            urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/register";
         } else if ("webLogin".equals(scanNfcPurpose)) {
-            urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/password";
-            //urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/weblogin";
+            //urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/password";
+            urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/weblogin";
         }
 
         try {
@@ -233,8 +233,9 @@ public class NfcScanActivity extends AppCompatActivity {
             conn.setRequestProperty("Accept", "application/json");
             conn.setDoOutput(true);
 
-            String jsonCredentialsString = String.format("{'nric': '%s', 'password': '%s'}",
-                    nric, password);
+            String jsonCredentialsString = String.format(
+                    "{'nric': '%s', 'password': '%s', 'deviceID': '%s', 'tokenID': '%s'}",
+                    nric, password, deviceID, tokenID);
             Log.d(TAG, jsonCredentialsString);
 
             OutputStream os = conn.getOutputStream();
