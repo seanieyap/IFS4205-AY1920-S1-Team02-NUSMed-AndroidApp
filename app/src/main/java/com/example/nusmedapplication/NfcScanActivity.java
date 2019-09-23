@@ -23,7 +23,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -42,6 +44,7 @@ public class NfcScanActivity extends AppCompatActivity {
     private String retrievedDeviceID = null;
     private String retrievedNric = null;
     private String retrievedPass = null;
+    private String retrievedJwt = null;
     private String scanNfcPurpose = null;
     private String uniqueIdString = null;
 
@@ -84,10 +87,18 @@ public class NfcScanActivity extends AppCompatActivity {
             // Read from page 6 of the NFC tag as the tag's unique ID is stored there
             byte[] uniqueIdBytes = nfcTag.readPages(6);
             uniqueIdString = Base64.encodeToString(uniqueIdBytes, Base64.DEFAULT).trim();
-            Log.d(TAG, "Scanned Tag ID: " + uniqueIdString);
+            Log.d(TAG, "onNewIntent() :: Scanned Tag ID: " + uniqueIdString);
 
-            AuthenticateTask authenticateTask = new AuthenticateTask();
-            authenticateTask.execute();
+            //AuthenticateTask authenticateTask = new AuthenticateTask();
+            //authenticateTask.execute();
+
+            if ("registerDevice".equals(scanNfcPurpose)) {
+                RegisterTask registerTask = new RegisterTask();
+                registerTask.execute();
+            } else if ("webLogin".equals(scanNfcPurpose)) {
+                WebLoginTask webLoginTask = new WebLoginTask();
+                webLoginTask.execute();
+            }
 
         } catch (IOException e) {
             Log.e(TAG, "IOException while writing MifareUltralight...", e);
@@ -186,11 +197,14 @@ public class NfcScanActivity extends AppCompatActivity {
             );
 
             retrievedDeviceID = sharedPreferences.getString("deviceID", null);
-            Log.d(TAG, "Device ID: " + retrievedDeviceID);
+            Log.d(TAG, "retrieveStoredData() :: Device ID: " + retrievedDeviceID);
+
+            retrievedJwt = sharedPreferences.getString("jwt", null);
+            Log.d(TAG, "retrieveStoredData() :: JWT: " + retrievedJwt);
 
             Intent intent = getIntent();
             scanNfcPurpose = intent.getStringExtra("scanNfcPurpose");
-            Log.d(TAG, "Scan NFC Purpose: " + scanNfcPurpose);
+            Log.d(TAG, "retrieveStoredData() :: Scan NFC Purpose: " + scanNfcPurpose);
 
             if ("registerDevice".equals(scanNfcPurpose)) {
                 retrievedNric = intent.getStringExtra("nric");
@@ -202,31 +216,23 @@ public class NfcScanActivity extends AppCompatActivity {
                 retrievedPass = sharedPreferences.getString("password", null);
             }
 
-            Log.d(TAG, "NRIC: " + retrievedNric + " , Password: " + retrievedPass);
+            Log.d(TAG, "retrieveStoredData() :: NRIC: " + retrievedNric + " , Password: " + retrievedPass);
 
         } catch (Exception e) {
             Log.e(TAG, "An Exception occurred...", e);
         }
     }
 
-    private boolean authenticateData() {
-        boolean authenticated = false;
+    private boolean register() {
+        boolean success = false;
         String deviceID = retrievedDeviceID;
         String nric = retrievedNric;
         String password = retrievedPass;
         String tokenID = uniqueIdString;
-        String urlString = null;
-
-        if ("registerDevice".equals(scanNfcPurpose)) {
-            //urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/password";
-            urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/register";
-        } else if ("webLogin".equals(scanNfcPurpose)) {
-            //urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/password";
-            urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/weblogin";
-        }
 
         try {
-            URL url = new URL(urlString);
+            URL url = new URL(
+                    "https://ifs4205team2-1.comp.nus.edu.sg/api/account/register");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -236,7 +242,221 @@ public class NfcScanActivity extends AppCompatActivity {
             String jsonCredentialsString = String.format(
                     "{'nric': '%s', 'password': '%s', 'deviceID': '%s', 'tokenID': '%s'}",
                     nric, password, deviceID, tokenID);
+
+            OutputStream os = conn.getOutputStream();
+            byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
+            os.write(jsonCredentialsBytes, 0, jsonCredentialsBytes.length);
+
+            int responseCode = conn.getResponseCode();
+            Log.d(TAG, "register() :: responseCode: " + Integer.toString(responseCode));
+
+            switch (responseCode) {
+                case 200:
+                    success = true;
+
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String currentLine;
+                    while ((currentLine = in.readLine()) != null) {
+                        response.append(currentLine);
+                    }
+                    in.close();
+
+                    String responseString = response.toString();
+                    Log.d(TAG, "register() :: responseString: " + responseString);
+
+                    break;
+                case 401:
+                    break;
+                case 500:
+                    Log.e(TAG, "An error has occured!");
+                default:
+                    break;
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "An Exception occurred...", e);
+            // Deal with timeout/ no internet connection
+        }
+
+        return success;
+    }
+
+    private class RegisterTask extends AsyncTask<String, Void, Boolean> {
+
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(NfcScanActivity.this);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setMessage(getString(R.string.authenticating_text));
+            progressDialog.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            return register();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean authenticated) {
+            if (authenticated) {
+                progressDialog.dismiss();
+                Log.d(TAG, "RegisterTask() :: Registration SUCCESS! Start HOME activity!");
+
+                Toast.makeText(getBaseContext(), R.string.authentication_success, Toast.LENGTH_LONG).show();
+
+                try {
+                    String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+
+                    SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
+                            "secret_shared_prefs",
+                            masterKeyAlias,
+                            getApplicationContext(),
+                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                    );
+
+
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("nric", retrievedNric);
+                    editor.putString("password", retrievedPass);
+                    editor.apply();
+
+                    Log.d(TAG, "RegisterTask() :: Saved (NRIC: " + retrievedNric + " , Password: " + retrievedPass + ")");
+
+                } catch (Exception e) {
+                    Log.e(TAG, "An Exception occurred...", e);
+                }
+
+                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                startActivity(intent);
+            } else {
+                progressDialog.dismiss();
+                Log.d(TAG, "RegisterTask() :: Registration FAILED! Start AUTHENTICATE activity!");
+                Toast.makeText(getBaseContext(), R.string.authentication_fail, Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
+                startActivity(intent);
+            }
+        }
+    }
+
+    private boolean weblogin() {
+        boolean authenticated = false;
+        String deviceID = retrievedDeviceID;
+        String jwt = retrievedJwt;
+        String tokenID = uniqueIdString;
+
+        try {
+            URL url = new URL(
+                    "https://ifs4205team2-1.comp.nus.edu.sg/api/account/weblogin");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; utf-8");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoOutput(true);
+
+            String jsonCredentialsString = String.format(
+                    "{'deviceID': '%s', 'tokenID': '%s', 'guid': '%s'}",
+                    deviceID, tokenID, jwt);
+            Log.d(TAG, "weblogin() :: jsonCredentialsString: " + jsonCredentialsString);
+
+            OutputStream os = conn.getOutputStream();
+            byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
+            os.write(jsonCredentialsBytes, 0, jsonCredentialsBytes.length);
+
+            int responseCode = conn.getResponseCode();
+            Log.d(TAG, "weblogin() :: responseCode: " + Integer.toString(responseCode));
+
+            switch (responseCode) {
+                case 200:
+                    authenticated = true;
+                    break;
+                case 401:
+                    break;
+                default:
+                    break;
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "An Exception occurred...", e);
+            // Deal with timeout/ no internet connection
+        }
+
+        return authenticated;
+    }
+
+    private class WebLoginTask extends AsyncTask<String, Void, Boolean> {
+
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(NfcScanActivity.this);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setMessage(getString(R.string.authenticating_text));
+            progressDialog.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            return weblogin();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean authenticated) {
+            if (authenticated) {
+                progressDialog.dismiss();
+                Log.d(TAG, "WebLoginTask() :: Web Login SUCCESS! Start HOME activity!");
+                Toast.makeText(getBaseContext(), R.string.authentication_success, Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                startActivity(intent);
+            } else {
+                progressDialog.dismiss();
+                Log.d(TAG, "WebLoginTask() :: Web Login FAILED! Start AUTHENTICATE activity!");
+                Toast.makeText(getBaseContext(), R.string.authentication_fail, Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
+                startActivity(intent);
+            }
+        }
+    }
+
+    /*private boolean authenticateData() {
+        boolean authenticated = false;
+        String deviceID = retrievedDeviceID;
+        String nric = retrievedNric;
+        String password = retrievedPass;
+        String jwt = retrievedJwt;
+        String tokenID = uniqueIdString;
+        String urlString = null;
+        String jsonCredentialsString = null;
+
+        if ("registerDevice".equals(scanNfcPurpose)) {
+            urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/register";
+            jsonCredentialsString = String.format(
+                    "{'nric': '%s', 'password': '%s', 'deviceID': '%s', 'tokenID': '%s'}",
+                    nric, password, deviceID, tokenID);
             Log.d(TAG, jsonCredentialsString);
+        } else if ("webLogin".equals(scanNfcPurpose)) {
+            urlString = "https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate/weblogin";
+            jsonCredentialsString = String.format(
+                    "{'tokenID': '%s', 'guid': '%s'}",
+                    tokenID, jwt);
+            Log.d(TAG, jsonCredentialsString);
+        }
+
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; utf-8");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoOutput(true);
 
             OutputStream os = conn.getOutputStream();
             byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
@@ -328,5 +548,5 @@ public class NfcScanActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         }
-    }
+    }*/
 }
