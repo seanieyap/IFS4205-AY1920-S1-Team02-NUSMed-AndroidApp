@@ -10,19 +10,19 @@
         android:id="@+id/patientRecordTitleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Record Title"
+        android:text="Record Title (max 45 characters)"
+        android:textSize="16dp"
         android:layout_marginTop="50dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@id/patientRecordTitleField"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/patientRecordTitleField"
-        android:layout_width="268dp"
-        android:layout_height="41dp"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
         android:layout_marginTop="10dp"
         android:ems="10"
-        android:hint="Blood Pressure"
+        android:hint="i.e. My Blood Pressure"
         android:inputType="textShortMessage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -30,94 +30,93 @@
         tools:ignore="Autofill" />
 
     <TextView
-        android:id="@+id/patientMedicalTypeText"
+        android:id="@+id/patientRecordDescriptionText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Medical Type"
+        android:text="Record Description (max 120 characters)"
+        android:textSize="16dp"
         android:layout_marginTop="30dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/patientRecordTitleField" />
-
-    <Spinner
-        android:id="@+id/patientMedicalTypeSpinner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/patientMedicalTypeText" />
-
-    <TextView
-        android:id="@+id/patientDiagnosisText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Diagnosis (optional)"
-        android:layout_marginTop="30dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/patientMedicalTypeSpinner" />
-
-    <Spinner
-        android:id="@+id/patientDiagnosisSpinner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/patientDiagnosisText" />
-
-    <RadioGroup
-        android:id="@+id/patientUploadRecordRadioGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/patientDiagnosisSpinner" >
-
-        <RadioButton
-            android:id="@+id/patientUploadDataRadioButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Upload Data" />
-
-        <RadioButton
-            android:id="@+id/patientUploadFileRadioButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Upload File" />
-    </RadioGroup>
+        app:layout_constraintStart_toStartOf="@id/patientRecordDescriptionField"
+        app:layout_constraintTop_toBottomOf="@id/patientRecordTitleField" />
 
     <EditText
-        android:id="@+id/patientUploadDataField"
-        android:layout_width="250dp"
+        android:id="@+id/patientRecordDescriptionField"
+        android:layout_width="300dp"
         android:layout_height="40dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="10dp"
         android:ems="10"
-        android:hint="Enter value here"
+        android:hint="Enter description here..."
+        android:inputType="textMultiLine"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/patientRecordDescriptionText"
+        tools:ignore="Autofill" />
+
+    <TextView
+        android:id="@+id/patientRecordTypeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Record Type"
+        android:textSize="16dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintStart_toStartOf="@id/patientRecordDescriptionField"
+        app:layout_constraintTop_toBottomOf="@+id/patientRecordDescriptionField" />
+
+    <Spinner
+        android:id="@+id/patientRecordTypeSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="10dp"
+        app:layout_constraintLeft_toRightOf="@+id/patientRecordTypeText"
+        app:layout_constraintTop_toBottomOf="@+id/patientRecordDescriptionField"/>
+
+    <TextView
+        android:id="@+id/patientRecordContentText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Content"
+        android:textSize="16dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintStart_toStartOf="@id/patientRecordTypeText"
+        app:layout_constraintTop_toBottomOf="@+id/patientRecordTypeText" />
+
+    <TextView
+        android:id="@+id/patientRecordContentConstraintText"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="@id/patientRecordContentText"
+        app:layout_constraintTop_toBottomOf="@+id/patientRecordContentText" />
+
+    <EditText
+        android:id="@+id/patientUploadContentField"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="Enter value here..."
         android:inputType="textShortMessage"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/patientUploadRecordRadioGroup"
+        app:layout_constraintTop_toBottomOf="@+id/patientRecordContentConstraintText"
         tools:ignore="Autofill" />
 
     <Button
         android:id="@+id/patientUploadFileButton"
-        android:layout_width="wrap_content"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="10dp"
         android:text="Select File"
         android:textAllCaps="false"
         android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/patientUploadRecordRadioGroup" />
+        app:layout_constraintStart_toStartOf="@+id/patientRecordContentConstraintText"
+        app:layout_constraintTop_toBottomOf="@+id/patientRecordContentConstraintText" />
 
     <Button
         android:id="@+id/patientSubmitButton"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
         android:text="Upload"
