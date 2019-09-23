@@ -6,4 +6,140 @@
     android:layout_height="match_parent"
     tools:context=".TherapistEmergencyUploadActivity">
 
+    <TextView
+        android:id="@+id/therapistEPatientText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Patient"
+        android:textSize="16dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintStart_toStartOf="@id/therapistERecordTitleField"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/therapistEPatientSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="10dp"
+        app:layout_constraintLeft_toRightOf="@+id/therapistEPatientText"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/therapistERecordTitleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Record Title (max 45 characters)"
+        android:textSize="16dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintStart_toStartOf="@id/therapistERecordTitleField"
+        app:layout_constraintTop_toBottomOf="@+id/therapistEPatientText" />
+
+    <EditText
+        android:id="@+id/therapistERecordTitleField"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="i.e. My Blood Pressure"
+        android:inputType="textShortMessage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordTitleText"
+        tools:ignore="Autofill" />
+
+    <TextView
+        android:id="@+id/therapistERecordDescriptionText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Record Description (max 120 characters)"
+        android:textSize="16dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintStart_toStartOf="@id/therapistERecordDescriptionField"
+        app:layout_constraintTop_toBottomOf="@id/therapistERecordTitleField" />
+
+    <EditText
+        android:id="@+id/therapistERecordDescriptionField"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="Enter description here..."
+        android:inputType="textMultiLine"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordDescriptionText"
+        tools:ignore="Autofill" />
+
+    <TextView
+        android:id="@+id/therapistERecordTypeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Record Type"
+        android:textSize="16dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintStart_toStartOf="@id/therapistERecordDescriptionField"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordDescriptionField" />
+
+    <Spinner
+        android:id="@+id/therapistERecordTypeSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="10dp"
+        app:layout_constraintLeft_toRightOf="@+id/therapistERecordTypeText"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordDescriptionField" />
+
+    <TextView
+        android:id="@+id/therapistERecordContentText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Content"
+        android:textSize="16dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintStart_toStartOf="@id/therapistERecordTypeText"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordTypeText" />
+
+    <TextView
+        android:id="@+id/therapistERecordContentConstraintText"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="@id/therapistERecordContentText"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordContentText" />
+
+    <EditText
+        android:id="@+id/therapistEUploadContentField"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="Enter value here..."
+        android:inputType="textShortMessage"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordContentConstraintText"
+        tools:ignore="Autofill" />
+
+    <Button
+        android:id="@+id/therapistEUploadFileButton"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Select File"
+        android:textAllCaps="false"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="@+id/therapistERecordContentConstraintText"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordContentConstraintText" />
+
+    <Button
+        android:id="@+id/therapistESubmitButton"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:text="Upload"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
