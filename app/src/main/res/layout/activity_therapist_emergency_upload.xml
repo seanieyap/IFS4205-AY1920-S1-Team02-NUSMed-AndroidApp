@@ -134,12 +134,21 @@
         app:layout_constraintTop_toBottomOf="@+id/therapistERecordContentConstraintText" />
 
     <Button
+        android:id="@+id/therapistECancelButton"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:text="Cancel"
+        app:layout_constraintStart_toStartOf="@+id/therapistERecordContentConstraintText"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <Button
         android:id="@+id/therapistESubmitButton"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
+        android:layout_marginLeft="100dp"
         android:text="Upload"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/therapistECancelButton"
         app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

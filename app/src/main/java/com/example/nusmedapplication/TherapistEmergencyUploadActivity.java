@@ -57,6 +57,14 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
         patientAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Setting the ArrayAdapter data on the Spinner
         patientSpinner.setAdapter(patientAdapter);
+
+        Button cancelButton = findViewById(R.id.therapistECancelButton);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
     }
 
     // Performing action onItemSelected and onNothing selected
