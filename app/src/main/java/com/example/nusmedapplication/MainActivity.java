@@ -292,6 +292,12 @@ public class MainActivity extends AppCompatActivity {
         loginButton.setEnabled(true);
     }
 
+    @Override
+    public void onBackPressed() {
+        // The following line is commented out to disable back press
+        // super.onBackPressed();
+    }
+
     private class LoginTask extends AsyncTask<String, Void, Boolean> {
 
         ProgressDialog progressDialog;
