@@ -27,4 +27,10 @@ public class PatientActivity extends AppCompatActivity {
         Intent intent = new Intent(this, PatientUploadActivity.class);
         startActivity(intent);
     }
+
+    @Override
+    public void onBackPressed() {
+        // The following line is commented out to disable back press
+        // super.onBackPressed();
+    }
 }

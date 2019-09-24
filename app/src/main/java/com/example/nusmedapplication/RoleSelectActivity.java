@@ -40,4 +40,10 @@ public class RoleSelectActivity extends AppCompatActivity {
         Intent intent = new Intent(this, TherapistActivity.class);
         startActivity(intent);
     }
+
+    @Override
+    public void onBackPressed() {
+        // The following line is commented out to disable back press
+        // super.onBackPressed();
+    }
 }
