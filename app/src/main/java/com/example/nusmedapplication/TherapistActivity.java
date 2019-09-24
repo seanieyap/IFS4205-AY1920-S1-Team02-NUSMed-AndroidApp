@@ -2,8 +2,12 @@ package com.example.nusmedapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -39,6 +43,37 @@ public class TherapistActivity extends AppCompatActivity {
     public void getTherapistEmergencyUploadPage() {
         Intent intent = new Intent(this, TherapistEmergencyUploadActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_therapist, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id){
+            case R.id.action_therapist_my_profile:
+                // TODO: implement my profile page
+                Intent profileIntent = new Intent(this, MyProfileActivity.class);
+                startActivity(profileIntent);
+                break;
+            case R.id.action_therapist_switch_role:
+                // TODO: actions with the server to switch user role
+                Intent roleIntent = new Intent(this, RoleSelectActivity.class);
+                startActivity(roleIntent);
+                break;
+            case R.id.action_therapist_logout:
+                // TODO: end the current session
+                Intent mainIntent = new Intent(this, MainActivity.class);
+                startActivity(mainIntent);
+                Toast.makeText(getBaseContext(), "You have been logged out", Toast.LENGTH_SHORT).show();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
