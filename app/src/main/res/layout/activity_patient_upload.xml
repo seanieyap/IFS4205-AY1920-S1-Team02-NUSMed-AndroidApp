@@ -120,6 +120,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
         android:text="Cancel"
+        android:textColor="@color/cardview_light_background"
+        android:background="@color/cardview_dark_background"
         app:layout_constraintStart_toStartOf="@+id/patientRecordContentConstraintText"
         app:layout_constraintBottom_toBottomOf="parent" />
 
@@ -130,6 +132,8 @@
         android:layout_marginBottom="30dp"
         android:layout_marginLeft="100dp"
         android:text="Upload"
+        android:textColor="@color/cardview_light_background"
+        android:background="@color/design_default_color_primary"
         app:layout_constraintLeft_toRightOf="@+id/patientCancelButton"
         app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
