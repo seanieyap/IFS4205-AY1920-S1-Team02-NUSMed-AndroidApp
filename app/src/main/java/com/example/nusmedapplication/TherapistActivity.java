@@ -69,6 +69,8 @@ public class TherapistActivity extends AppCompatActivity {
             case R.id.action_therapist_logout:
                 // TODO: end the current session
                 Intent mainIntent = new Intent(this, MainActivity.class);
+                mainIntent.addCategory( Intent.CATEGORY_HOME );
+                mainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(mainIntent);
                 Toast.makeText(getBaseContext(), "You have been logged out", Toast.LENGTH_SHORT).show();
                 break;
