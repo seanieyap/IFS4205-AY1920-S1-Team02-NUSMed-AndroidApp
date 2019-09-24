@@ -60,6 +60,10 @@
             android:name=".TherapistEmergencyUploadActivity"
             android:label="Upload Record for Emergency Patient">
         </activity>
+        <activity
+            android:name=".MyProfileActivity"
+            android:label="My Profile">
+        </activity>
     </application>
 
 </manifest>
