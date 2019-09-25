@@ -24,8 +24,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "DEBUG - MainActivity";
 
     private String retrievedDeviceID = null;
-    private String retrievedNric = null;
-    private String retrievedPass = null;
     private String retrievedJwt = null;
 
     @Override
@@ -35,9 +33,15 @@ public class MainActivity extends AppCompatActivity {
 
         retrieveStoredData();
 
-        if (retrievedNric != null && retrievedPass != null) {
-            AuthenticateTask authenticateTask = new AuthenticateTask();
-            authenticateTask.execute();
+        if (retrievedJwt != null) {
+            Log.d(TAG, "onCreate() :: retrievedJwt: " + retrievedJwt);
+            AuthenticateJwtTask authenticateJwtTask = new AuthenticateJwtTask();
+            authenticateJwtTask.execute();
+        } else {
+            Log.d(TAG, "onCreate() :: No stored JWT! Application data might have been wiped or " +
+                    "application was just installed. Start AUTHENTICATE activity!");
+            Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
+            startActivity(intent);
         }
     }
 
@@ -54,8 +58,6 @@ public class MainActivity extends AppCompatActivity {
             );
 
             retrievedDeviceID = sharedPreferences.getString("deviceID", null);
-            retrievedNric = sharedPreferences.getString("nric", null);
-            retrievedPass = sharedPreferences.getString("password", null);
             retrievedJwt = sharedPreferences.getString("jwt", null);
 
             if (retrievedDeviceID == null) {
@@ -66,22 +68,14 @@ public class MainActivity extends AppCompatActivity {
                 retrievedDeviceID = deviceID;
             }
 
-            if (retrievedNric == null || retrievedPass == null) {
-                Log.d(TAG, "retrieveStoredData() :: No stored user/pass! Start AUTHENTICATE activity!");
-                Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
-                startActivity(intent);
-            }
-
         } catch (Exception e) {
             Log.e(TAG, "An Exception occurred...", e);
         }
     }
 
-    private boolean authenticateData() {
+    private boolean authenticateJwt() {
         boolean authenticated = false;
         String deviceID = retrievedDeviceID;
-        String nric = retrievedNric;
-        String password = retrievedPass;
         String jwt = retrievedJwt;
 
         try {
@@ -95,21 +89,22 @@ public class MainActivity extends AppCompatActivity {
 
             String jsonCredentialsString = String.format(
                     "{'nric': '%s', 'password': '%s', 'deviceID': '%s', 'guid': '%s'}",
-                    nric, password, deviceID, jwt);
-            Log.d(TAG, "authenticateData() :: jsonCredentialsString: " + jsonCredentialsString);
+                    null, null, deviceID, jwt);
+            Log.d(TAG, "authenticateJwt() :: jsonCredentialsString: " + jsonCredentialsString);
 
             OutputStream os = conn.getOutputStream();
             byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
             os.write(jsonCredentialsBytes, 0, jsonCredentialsBytes.length);
 
             int responseCode = conn.getResponseCode();
-            Log.d(TAG, "authenticateData() :: responseCode: " + Integer.toString(responseCode));
+            Log.d(TAG, "authenticateJwt() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
                     authenticated = true;
 
-                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    /*BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
                     StringBuilder response = new StringBuilder();
                     String currentLine;
                     while ((currentLine = in.readLine()) != null) {
@@ -117,8 +112,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                     in.close();
 
-                    String newGuid = response.toString().replace("\"", "");;
-                    Log.d(TAG, "authenticateData() :: JWT: " + newGuid);
+                    String newJwt = response.toString().replace("\"", "");;
+                    Log.d(TAG, "authenticateJwt() :: newJwt: " + newJwt);
 
                     String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
 
@@ -130,10 +125,9 @@ public class MainActivity extends AppCompatActivity {
                             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
                     );
 
-
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("jwt", newGuid);
-                    editor.apply();
+                    editor.putString("jwt", newJwt);
+                    editor.apply();*/
 
                     break;
                 case 401:
@@ -150,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         return authenticated;
     }
 
-    private class AuthenticateTask extends AsyncTask<String, Void, Boolean> {
+    private class AuthenticateJwtTask extends AsyncTask<String, Void, Boolean> {
 
         ProgressDialog progressDialog;
 
@@ -166,22 +160,24 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(String... params) {
-            return authenticateData();
+            return authenticateJwt();
         }
 
         @Override
         protected void onPostExecute(Boolean authenticated) {
             if (authenticated) {
                 progressDialog.dismiss();
-                Log.d(TAG, "AuthenticateTask() :: Authentication SUCCESS! Start HOME activity!");
+                Log.d(TAG, "AuthenticateJwtTask() :: Authentication SUCCESS! Start HOME activity!");
                 Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                 startActivity(intent);
             } else {
                 progressDialog.dismiss();
-                Log.d(TAG, "AuthenticateTask() :: Authentication FAILED! Start AUTHENTICATE activity!");
+                Log.d(TAG, "AuthenticateJwtTask() :: Authentication FAILED! " +
+                        "JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
                 startActivity(intent);
             }
         }
     }
+
 }
