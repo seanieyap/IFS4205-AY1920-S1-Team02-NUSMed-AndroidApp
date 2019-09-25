@@ -1,11 +1,5 @@
 package com.example.nusmedapplication;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKeys;
-
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,6 +14,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
 
 import java.io.IOException;
 
@@ -123,6 +123,9 @@ public class NfcScanActivity extends AppCompatActivity {
             Toast.makeText(getBaseContext(), "Scan successful!", Toast.LENGTH_LONG).show();
 
             //TODO: Retrieve device ID, send device ID + tag ID to server to authenticate user, go to next activity
+
+            // Intent roleIntent = new Intent(getApplicationContext(), RoleSelectActivity.class);
+            // startActivity(roleIntent);
 
         } catch (IOException e) {
             Log.e(TAG, "IOException while writing MifareUltralight...", e);

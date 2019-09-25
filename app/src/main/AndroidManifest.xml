@@ -36,6 +36,34 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".RoleSelectActivity"
+            android:label="Select Role">
+        </activity>
+        <activity
+            android:name=".PatientActivity"
+            android:label="Patient Page">
+        </activity>
+        <activity
+            android:name=".PatientUploadActivity"
+            android:label="Upload Record">
+        </activity>
+        <activity
+            android:name=".TherapistActivity"
+            android:label="Therapist Page">
+        </activity>
+        <activity
+            android:name=".TherapistNormalUploadActivity"
+            android:label="Upload Record for Patient">
+        </activity>
+        <activity
+            android:name=".TherapistEmergencyUploadActivity"
+            android:label="Upload Record for Emergency Patient">
+        </activity>
+        <activity
+            android:name=".MyProfileActivity"
+            android:label="My Profile">
+        </activity>
     </application>
 
 </manifest>
