@@ -207,11 +207,6 @@ public class NfcScanActivity extends AppCompatActivity {
                 retrievedPass = intent.getStringExtra("password");
             }
 
-            if ("webLogin".equals(scanNfcPurpose)) {
-                retrievedNric = sharedPreferences.getString("nric", null);
-                retrievedPass = sharedPreferences.getString("password", null);
-            }
-
             Log.d(TAG, "retrieveStoredData() :: retrievedNric: " + retrievedNric);
             Log.d(TAG, "retrieveStoredData() :: retrievedPass: " + retrievedPass);
 
@@ -335,7 +330,7 @@ public class NfcScanActivity extends AppCompatActivity {
             conn.setDoOutput(true);
 
             String jsonCredentialsString = String.format(
-                    "{'nric': '%s', 'password': '%s', 'deviceID': '%s', 'guid': '%s'}",
+                    "{'nric': '%s', 'password': '%s', 'deviceID': '%s', 'guid': %s}",
                     nric, password, deviceID, null);
             Log.d(TAG, "authenticate() :: jsonCredentialsString: " + jsonCredentialsString);
 
@@ -431,8 +426,8 @@ public class NfcScanActivity extends AppCompatActivity {
         }
     }
 
-    private boolean weblogin() {
-        boolean authenticated = false;
+    private int weblogin() {
+        int responseCode = 500;
         String deviceID = retrievedDeviceID;
         String jwt = retrievedJwt;
         String tokenID = uniqueIdString;
@@ -455,12 +450,11 @@ public class NfcScanActivity extends AppCompatActivity {
             byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
             os.write(jsonCredentialsBytes, 0, jsonCredentialsBytes.length);
 
-            int responseCode = conn.getResponseCode();
+            responseCode = conn.getResponseCode();
             Log.d(TAG, "weblogin() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
-                    authenticated = true;
                     break;
                 case 401:
                     break;
@@ -473,10 +467,10 @@ public class NfcScanActivity extends AppCompatActivity {
             // Deal with timeout/ no internet connection
         }
 
-        return authenticated;
+        return responseCode;
     }
 
-    private class WebLoginTask extends AsyncTask<String, Void, Boolean> {
+    private class WebLoginTask extends AsyncTask<String, Void, Integer> {
 
         ProgressDialog progressDialog;
 
@@ -491,27 +485,39 @@ public class NfcScanActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Boolean doInBackground(String... params) {
+        protected Integer doInBackground(String... params) {
             return weblogin();
         }
 
         @Override
-        protected void onPostExecute(Boolean authenticated) {
-            if (authenticated) {
-                progressDialog.dismiss();
-                Log.d(TAG, "WebLoginTask() :: Web Login SUCCESS! Start HOME activity!");
-                Toast.makeText(getBaseContext(), R.string.authentication_success,
-                        Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-                startActivity(intent);
-            } else {
-                progressDialog.dismiss();
-                Log.d(TAG, "WebLoginTask() :: Web Login FAILED! " +
-                        "deviceID/tokenID/JWT might be invalid. Start AUTHENTICATE activity!");
-                Toast.makeText(getBaseContext(), R.string.authentication_fail,
-                        Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
-                startActivity(intent);
+        protected void onPostExecute(Integer responseCode) {
+            progressDialog.dismiss();
+            Intent intent;
+
+            switch (responseCode) {
+                case 200:
+                    Log.d(TAG, "WebLoginTask() :: Web Login SUCCESS! Start HOME activity!");
+                    Toast.makeText(getBaseContext(), R.string.authentication_success,
+                            Toast.LENGTH_LONG).show();
+                    intent = new Intent(getApplicationContext(), HomeActivity.class);
+                    startActivity(intent);
+                    break;
+                case 401:
+                    Log.d(TAG, "WebLoginTask() :: Web Login FAILED! " +
+                            "deviceID/tokenID/JWT might be invalid. Start AUTHENTICATE activity!");
+                    Toast.makeText(getBaseContext(), R.string.authentication_fail,
+                            Toast.LENGTH_LONG).show();
+                    intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
+                    startActivity(intent);
+                    break;
+                case 404:
+                    Log.d(TAG, "WebLoginTask() :: The web app did not trigger an MFA login!");
+                    Toast.makeText(getBaseContext(), R.string.weblogin_fail,
+                            Toast.LENGTH_LONG).show();
+                    intent = new Intent(getApplicationContext(), HomeActivity.class);
+                    startActivity(intent);
+                default:
+                    break;
             }
         }
     }

@@ -19,4 +19,6 @@
     <string name="weblogin_button">Web Login</string>
     <string name="weblogin_success">Web login successful!</string>
     <string name="select_role_button">Select Role</string>
+    <string name="reauthentication_fail">You have been logged out due to inactivity or there is an issue with your deviceID!</string>
+    <string name="weblogin_fail">The web app did not trigger an MFA login!</string>
 </resources>
