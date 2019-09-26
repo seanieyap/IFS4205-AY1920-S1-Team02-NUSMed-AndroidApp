@@ -66,14 +66,6 @@ public class NfcScanActivity extends AppCompatActivity {
                 finish();
             }
         });
-
-        if ("registerDevice".equals(scanNfcPurpose)) {
-            RegisterTask registerTask = new RegisterTask();
-            registerTask.execute();
-        } else if ("webLogin".equals(scanNfcPurpose)) {
-            WebLoginTask webLoginTask = new WebLoginTask();
-            webLoginTask.execute();
-        }
     }
 
     @Override
@@ -241,7 +233,7 @@ public class NfcScanActivity extends AppCompatActivity {
 
             String jsonCredentialsString = String.format(
                     "{'nric': '%s', 'password': '%s', 'deviceID': '%s', 'tokenID': '%s'}",
-                    nric, password, deviceID, "urNhf0/fSG+UiZ6cPIQsVg==");
+                    nric, password, deviceID, tokenID);
 
             OutputStream os = conn.getOutputStream();
             byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
@@ -451,7 +443,7 @@ public class NfcScanActivity extends AppCompatActivity {
 
             String jsonCredentialsString = String.format(
                     "{'deviceID': '%s', 'tokenID': '%s', 'guid': '%s'}",
-                    deviceID, "urNhf0/fSG+UiZ6cPIQsVg==", jwt);
+                    deviceID, tokenID, jwt);
             Log.d(TAG, "weblogin() :: jsonCredentialsString: " + jsonCredentialsString);
 
             OutputStream os = conn.getOutputStream();
