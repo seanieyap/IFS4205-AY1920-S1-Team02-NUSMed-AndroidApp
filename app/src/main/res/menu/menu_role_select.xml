@@ -15,11 +15,6 @@
                 android:icon="@drawable/ic_biz_card"
                 android:title="My Profile"
                 app:showAsAction="ifRoom" />
-            <item
-                android:id="@+id/action_role_logout"
-                android:icon="@drawable/ic_logout"
-                android:title="Logout"
-                app:showAsAction="ifRoom" />
         </menu>
     </item>
 </menu>

@@ -63,14 +63,6 @@ public class RoleSelectActivity extends AppCompatActivity {
                 Intent profileIntent = new Intent(this, MyProfileActivity.class);
                 startActivity(profileIntent);
                 break;
-            case R.id.action_role_logout:
-                // TODO: end the current session
-                Intent mainIntent = new Intent(this, MainActivity.class);
-                mainIntent.addCategory( Intent.CATEGORY_HOME );
-                mainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(mainIntent);
-                Toast.makeText(getBaseContext(), "You have been logged out", Toast.LENGTH_SHORT).show();
-                break;
         }
         return super.onOptionsItemSelected(item);
     }
