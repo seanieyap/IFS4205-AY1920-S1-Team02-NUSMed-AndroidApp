@@ -2,6 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.nusmedapplication">
 
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -31,17 +42,34 @@
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
+        <activity
+            android:name=".RoleSelectActivity"
+            android:label="Select Role">
+        </activity>
+        <activity
+            android:name=".PatientActivity"
+            android:label="Patient Page">
+        </activity>
+        <activity
+            android:name=".PatientUploadActivity"
+            android:label="Upload Record">
+        </activity>
+        <activity
+            android:name=".TherapistActivity"
+            android:label="Therapist Page">
+        </activity>
+        <activity
+            android:name=".TherapistNormalUploadActivity"
+            android:label="Upload Record for Patient">
+        </activity>
+        <activity
+            android:name=".TherapistEmergencyUploadActivity"
+            android:label="Upload Record for Emergency Patient">
+        </activity>
+        <activity
+            android:name=".MyProfileActivity"
+            android:label="My Profile">
+        </activity>
     </application>
-    <uses-feature
-        android:name="android.hardware.camera.any"
-        android:required="true" />
-
-    <uses-feature
-        android:name="android.hardware.nfc"
-        android:required="true" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CAMERA" />
-
-    <uses-permission android:name="android.permission.NFC" />
 
 </manifest>
