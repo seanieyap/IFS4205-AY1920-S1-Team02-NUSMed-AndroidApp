@@ -42,6 +42,15 @@ public class HomeActivity extends AppCompatActivity {
                 callNfcScan();
             }
         });
+
+        Button roleSelectButton = findViewById(R.id.selectRoleButton);
+        roleSelectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent roleIntent = new Intent(getApplicationContext(), RoleSelectActivity.class);
+                startActivity(roleIntent);
+            }
+        });
     }
 
     @Override

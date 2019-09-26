@@ -162,7 +162,7 @@ public class AuthenticateActivity extends AppCompatActivity {
 
         if (validateInput()) {
             Intent intent = new Intent(getApplicationContext(), NfcScanActivity.class);
-            intent.putExtra("nric", nric);
+            intent.putExtra("nric", nric.toUpperCase());
             intent.putExtra("password", password);
             intent.putExtra("scanNfcPurpose", "registerDevice");
             startActivity(intent);

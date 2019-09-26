@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -88,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
             conn.setDoOutput(true);
 
             String jsonCredentialsString = String.format(
-                    "{'nric': '%s', 'password': '%s', 'deviceID': '%s', 'guid': '%s'}",
+                    "{'nric': %s, 'password': %s, 'deviceID': '%s', 'guid': '%s'}",
                     null, null, deviceID, jwt);
             Log.d(TAG, "authenticateJwt() :: jsonCredentialsString: " + jsonCredentialsString);
 
@@ -174,6 +175,8 @@ public class MainActivity extends AppCompatActivity {
                 progressDialog.dismiss();
                 Log.d(TAG, "AuthenticateJwtTask() :: Authentication FAILED! " +
                         "JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
+                        Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
                 startActivity(intent);
             }
