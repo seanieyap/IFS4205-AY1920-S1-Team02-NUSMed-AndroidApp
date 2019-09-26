@@ -6,72 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/loginButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="@string/login_button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/passwordField" />
-
-    <EditText
-        android:id="@+id/nricField"
-        android:layout_width="268dp"
-        android:layout_height="41dp"
-        android:layout_marginTop="10dp"
-        android:ems="10"
-        android:hint="@string/nric_field_helptext"
-        android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nricText"
-        tools:ignore="Autofill" />
-
-    <EditText
-        android:id="@+id/passwordField"
-        android:layout_width="268dp"
-        android:layout_height="41dp"
-        android:layout_marginTop="20dp"
-        android:ems="10"
-        android:hint="@string/password_field_helptext"
-        android:inputType="textPassword"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nricField"
-        tools:ignore="Autofill" />
-
     <ImageView
-        android:id="@+id/logo"
+        android:id="@+id/splashLogo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="200dp"
         android:contentDescription="@string/logo_content_description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/nusmed_logo" />
-
-    <TextView
-        android:id="@+id/nricText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="5dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="50dp"
-        android:text="@string/nric_text"
-        app:layout_constraintStart_toStartOf="@+id/nricField"
-        app:layout_constraintTop_toBottomOf="@+id/logo" />
-
-    <TextView
-        android:id="@+id/forgotPasswordText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="@string/forgot_password_text"
-        android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loginButton" />
 </androidx.constraintlayout.widget.ConstraintLayout>
