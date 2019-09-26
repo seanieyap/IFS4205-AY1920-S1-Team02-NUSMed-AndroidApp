@@ -16,9 +16,9 @@
                 android:title="My Profile"
                 app:showAsAction="ifRoom" />
             <item
-                android:id="@+id/action_role_logout"
-                android:icon="@drawable/ic_logout"
-                android:title="Logout"
+                android:id="@+id/action_role_web_login"
+                android:icon="@drawable/ic_scan"
+                android:title="Web Login"
                 app:showAsAction="ifRoom" />
         </menu>
     </item>

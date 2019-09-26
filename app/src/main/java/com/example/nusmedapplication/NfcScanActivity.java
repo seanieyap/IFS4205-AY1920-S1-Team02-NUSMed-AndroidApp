@@ -1,11 +1,5 @@
 package com.example.nusmedapplication;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKeys;
-
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -17,11 +11,17 @@ import android.nfc.tech.MifareUltralight;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -409,10 +409,10 @@ public class NfcScanActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean authenticated) {
             if (authenticated) {
                 progressDialog.dismiss();
-                Log.d(TAG, "AuthenticateTask() :: Authentication SUCCESS! Start HOME activity!");
+                Log.d(TAG, "AuthenticateTask() :: Authentication SUCCESS! Start RoleSelect activity!");
                 Toast.makeText(getBaseContext(), R.string.authentication_success,
                         Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                Intent intent = new Intent(getApplicationContext(), RoleSelectActivity.class);
                 startActivity(intent);
             } else {
                 progressDialog.dismiss();
@@ -496,10 +496,10 @@ public class NfcScanActivity extends AppCompatActivity {
 
             switch (responseCode) {
                 case 200:
-                    Log.d(TAG, "WebLoginTask() :: Web Login SUCCESS! Start HOME activity!");
+                    Log.d(TAG, "WebLoginTask() :: Web Login SUCCESS! Start RoleSelect activity!");
                     Toast.makeText(getBaseContext(), R.string.authentication_success,
                             Toast.LENGTH_LONG).show();
-                    intent = new Intent(getApplicationContext(), HomeActivity.class);
+                    intent = new Intent(getApplicationContext(), RoleSelectActivity.class);
                     startActivity(intent);
                     break;
                 case 401:
@@ -514,7 +514,7 @@ public class NfcScanActivity extends AppCompatActivity {
                     Log.d(TAG, "WebLoginTask() :: The web app did not trigger an MFA login!");
                     Toast.makeText(getBaseContext(), R.string.weblogin_fail,
                             Toast.LENGTH_LONG).show();
-                    intent = new Intent(getApplicationContext(), HomeActivity.class);
+                    intent = new Intent(getApplicationContext(), RoleSelectActivity.class);
                     startActivity(intent);
                 default:
                     break;

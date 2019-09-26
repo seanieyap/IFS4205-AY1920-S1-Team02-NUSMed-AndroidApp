@@ -7,7 +7,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -61,18 +60,13 @@ public class TherapistActivity extends AppCompatActivity {
                 Intent profileIntent = new Intent(this, MyProfileActivity.class);
                 startActivity(profileIntent);
                 break;
+            case R.id.action_therapist_web_login:
+                callNfcScan();
+                break;
             case R.id.action_therapist_switch_role:
                 // TODO: actions with the server to switch user role
                 Intent roleIntent = new Intent(this, RoleSelectActivity.class);
                 startActivity(roleIntent);
-                break;
-            case R.id.action_therapist_logout:
-                // TODO: end the current session
-                Intent mainIntent = new Intent(this, MainActivity.class);
-                mainIntent.addCategory( Intent.CATEGORY_HOME );
-                mainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(mainIntent);
-                Toast.makeText(getBaseContext(), "You have been logged out", Toast.LENGTH_SHORT).show();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -82,5 +76,11 @@ public class TherapistActivity extends AppCompatActivity {
     public void onBackPressed() {
         // The following line is commented out to disable back press
         // super.onBackPressed();
+    }
+
+    private void callNfcScan() {
+        Intent intent = new Intent(getApplicationContext(), NfcScanActivity.class);
+        intent.putExtra("scanNfcPurpose", "webLogin");
+        startActivity(intent);
     }
 }
