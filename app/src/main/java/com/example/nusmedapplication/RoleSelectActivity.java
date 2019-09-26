@@ -83,6 +83,9 @@ public class RoleSelectActivity extends AppCompatActivity {
                 Intent profileIntent = new Intent(this, MyProfileActivity.class);
                 startActivity(profileIntent);
                 break;
+            case R.id.action_role_web_login:
+                callNfcScan();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }

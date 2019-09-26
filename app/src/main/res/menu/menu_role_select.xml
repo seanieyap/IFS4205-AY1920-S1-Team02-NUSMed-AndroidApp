@@ -15,6 +15,11 @@
                 android:icon="@drawable/ic_biz_card"
                 android:title="My Profile"
                 app:showAsAction="ifRoom" />
+            <item
+                android:id="@+id/action_role_web_login"
+                android:icon="@drawable/ic_scan"
+                android:title="Web Login"
+                app:showAsAction="ifRoom" />
         </menu>
     </item>
 </menu>

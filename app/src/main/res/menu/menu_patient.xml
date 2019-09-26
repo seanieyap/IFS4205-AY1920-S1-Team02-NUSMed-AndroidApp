@@ -16,6 +16,11 @@
                 android:title="My Profile"
                 app:showAsAction="ifRoom" />
             <item
+                android:id="@+id/action_patient_web_login"
+                android:icon="@drawable/ic_scan"
+                android:title="Web Login"
+                app:showAsAction="ifRoom" />
+            <item
                 android:id="@+id/action_patient_switch_role"
                 android:icon="@drawable/ic_switch_role"
                 android:title="Switch Role"
