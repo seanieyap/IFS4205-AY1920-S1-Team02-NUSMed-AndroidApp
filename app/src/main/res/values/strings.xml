@@ -21,4 +21,6 @@
     <string name="select_role_button">Select Role</string>
     <string name="reauthentication_fail">You have been logged out due to inactivity or there is an issue with your deviceID!</string>
     <string name="weblogin_fail">The web app did not trigger an MFA login!</string>
+    <string name="m">3qqX8gbcnwDe3yGyJRStttFjlPxwr9xkvv+W0I3ToVFgIdW9YPhzzkAOs9qGw2likBcXS+TfGRna90FS5QZdPNCKju6nbu+SSoYjo5047PwChG9w4Ofy9PZyPdbyHktWo8BEQx9SeAn1h181p2zInnzLA6Oh1sJPWpnDFIurwtU=</string>
+    <string name="e">AQAB</string>
 </resources>

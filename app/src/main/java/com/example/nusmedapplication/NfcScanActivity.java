@@ -17,6 +17,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -27,9 +29,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.spec.RSAPublicKeySpec;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.NFC;
@@ -47,6 +54,7 @@ public class NfcScanActivity extends AppCompatActivity {
     private String retrievedJwt = null;
     private String scanNfcPurpose = null;
     private String uniqueIdString = null;
+    private String jwtRole = null;
 
     @Override
     public void onCreate(Bundle savedState) {
@@ -330,7 +338,7 @@ public class NfcScanActivity extends AppCompatActivity {
             conn.setDoOutput(true);
 
             String jsonCredentialsString = String.format(
-                    "{'nric': '%s', 'password': '%s', 'deviceID': '%s', 'guid': %s}",
+                    "{'nric': '%s', 'password': '%s', 'deviceID': '%s', 'jwt': %s}",
                     nric, password, deviceID, null);
             Log.d(TAG, "authenticate() :: jsonCredentialsString: " + jsonCredentialsString);
 
@@ -343,8 +351,7 @@ public class NfcScanActivity extends AppCompatActivity {
 
             switch (responseCode) {
                 case 200:
-                    authenticated = true;
-
+                    // Read JWT from response
                     BufferedReader in = new BufferedReader(
                             new InputStreamReader(conn.getInputStream()));
                     StringBuilder response = new StringBuilder();
@@ -357,19 +364,49 @@ public class NfcScanActivity extends AppCompatActivity {
                     String newJwt = response.toString().replace("\"", "");;
                     Log.d(TAG, "authenticate() :: newJwt: " + newJwt);
 
-                    String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+                    // Separate JWT into header, claims and signature
+                    String[] newJwtParts = newJwt.split("\\.");
+                    String claims = newJwtParts[0];
+                    String signature = newJwtParts[1];
 
-                    SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
-                            "secret_shared_prefs",
-                            masterKeyAlias,
-                            getApplicationContext(),
-                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                    );
+                    // Verify signature in JWT
+                    byte[] modulusBytes = Base64.decode(getString(R.string.m), Base64.DEFAULT);
+                    byte[] exponentBytes = Base64.decode(getString(R.string.e), Base64.DEFAULT);
+                    BigInteger modulus = new BigInteger(1, modulusBytes);
+                    BigInteger exponent = new BigInteger(1, exponentBytes);
 
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("jwt", newJwt);
-                    editor.apply();
+                    RSAPublicKeySpec rsaPubKey = new RSAPublicKeySpec(modulus, exponent);
+                    KeyFactory kf = KeyFactory.getInstance("RSA");
+                    PublicKey pubKey = kf.generatePublic(rsaPubKey);
+
+                    Signature signCheck = Signature.getInstance("SHA256withRSA");
+                    signCheck.initVerify(pubKey);
+                    signCheck.update(Base64.decode(claims, Base64.DEFAULT));
+                    authenticated = signCheck.verify(Base64.decode(signature, Base64.DEFAULT));
+
+                    if (authenticated) {
+                        // Store JWT in EncryptedSharedPreferences
+                        String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+
+                        SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
+                                "secret_shared_prefs",
+                                masterKeyAlias,
+                                getApplicationContext(),
+                                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                        );
+
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("jwt", newJwt);
+                        editor.apply();
+
+                        // Get roles from JWT
+                        byte[] claimsBytes = Base64.decode(claims, Base64.DEFAULT);
+                        String claimsString = new String(claimsBytes, "UTF-8");
+                        JSONObject jwtObj = new JSONObject(claimsString);
+                        jwtRole = jwtObj.getString("Roles");
+                        Log.d(TAG, "authenticate() :: Roles: " + jwtRole);
+                    }
 
                     break;
                 case 401:
@@ -409,10 +446,12 @@ public class NfcScanActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean authenticated) {
             if (authenticated) {
                 progressDialog.dismiss();
-                Log.d(TAG, "AuthenticateTask() :: Authentication SUCCESS! Start RoleSelect activity!");
+                Log.d(TAG, "AuthenticateTask() :: Authentication SUCCESS! " +
+                        "Start RoleSelect activity!");
                 Toast.makeText(getBaseContext(), R.string.authentication_success,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), RoleSelectActivity.class);
+                intent.putExtra("role", jwtRole);
                 startActivity(intent);
             } else {
                 progressDialog.dismiss();
@@ -442,7 +481,7 @@ public class NfcScanActivity extends AppCompatActivity {
             conn.setDoOutput(true);
 
             String jsonCredentialsString = String.format(
-                    "{'deviceID': '%s', 'tokenID': '%s', 'guid': '%s'}",
+                    "{'deviceID': '%s', 'tokenID': '%s', 'jwt': '%s'}",
                     deviceID, tokenID, jwt);
             Log.d(TAG, "weblogin() :: jsonCredentialsString: " + jsonCredentialsString);
 
@@ -455,8 +494,67 @@ public class NfcScanActivity extends AppCompatActivity {
 
             switch (responseCode) {
                 case 200:
+                    // Read JWT from response
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String currentLine;
+                    while ((currentLine = in.readLine()) != null) {
+                        response.append(currentLine);
+                    }
+                    in.close();
+
+                    String newJwt = response.toString().replace("\"", "");;
+                    Log.d(TAG, "weblogin() :: newJwt: " + newJwt);
+
+                    // Separate JWT into header, claims and signature
+                    String[] newJwtParts = newJwt.split("\\.");
+                    String claims = newJwtParts[0];
+                    String signature = newJwtParts[1];
+
+                    // Verify signature in JWT
+                    byte[] modulusBytes = Base64.decode(getString(R.string.m), Base64.DEFAULT);
+                    byte[] exponentBytes = Base64.decode(getString(R.string.e), Base64.DEFAULT);
+                    BigInteger modulus = new BigInteger(1, modulusBytes);
+                    BigInteger exponent = new BigInteger(1, exponentBytes);
+
+                    RSAPublicKeySpec rsaPubKey = new RSAPublicKeySpec(modulus, exponent);
+                    KeyFactory kf = KeyFactory.getInstance("RSA");
+                    PublicKey pubKey = kf.generatePublic(rsaPubKey);
+
+                    Signature signCheck = Signature.getInstance("SHA256withRSA");
+                    signCheck.initVerify(pubKey);
+                    signCheck.update(Base64.decode(claims, Base64.DEFAULT));
+                    boolean validSig = signCheck.verify(Base64.decode(signature, Base64.DEFAULT));
+
+                    if (validSig) {
+                        // Store JWT in EncryptedSharedPreferences
+                        String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+
+                        SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
+                                "secret_shared_prefs",
+                                masterKeyAlias,
+                                getApplicationContext(),
+                                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                        );
+
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("jwt", newJwt);
+                        editor.apply();
+
+                        // Get roles from JWT
+                        byte[] claimsBytes = Base64.decode(claims, Base64.DEFAULT);
+                        String claimsString = new String(claimsBytes, "UTF-8");
+                        JSONObject jwtObj = new JSONObject(claimsString);
+                        jwtRole = jwtObj.getString("Roles");
+                        Log.d(TAG, "webLogin() :: Roles: " + jwtRole);
+                    }
+
                     break;
                 case 401:
+                    break;
+                case 404:
                     break;
                 default:
                     break;
@@ -500,6 +598,7 @@ public class NfcScanActivity extends AppCompatActivity {
                     Toast.makeText(getBaseContext(), R.string.authentication_success,
                             Toast.LENGTH_LONG).show();
                     intent = new Intent(getApplicationContext(), RoleSelectActivity.class);
+                    intent.putExtra("role", jwtRole);
                     startActivity(intent);
                     break;
                 case 401:
@@ -514,8 +613,7 @@ public class NfcScanActivity extends AppCompatActivity {
                     Log.d(TAG, "WebLoginTask() :: The web app did not trigger an MFA login!");
                     Toast.makeText(getBaseContext(), R.string.weblogin_fail,
                             Toast.LENGTH_LONG).show();
-                    intent = new Intent(getApplicationContext(), RoleSelectActivity.class);
-                    startActivity(intent);
+                    finish();
                 default:
                     break;
             }
