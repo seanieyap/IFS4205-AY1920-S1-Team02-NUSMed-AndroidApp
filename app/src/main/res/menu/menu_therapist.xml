@@ -13,17 +13,17 @@
             <item
                 android:id="@+id/action_therapist_my_profile"
                 android:icon="@drawable/ic_biz_card"
-                android:title="My Profile"
+                android:title="@string/my_profile_text"
                 app:showAsAction="ifRoom" />
             <item
                 android:id="@+id/action_therapist_web_login"
                 android:icon="@drawable/ic_scan"
-                android:title="Web Login"
+                android:title="@string/weblogin_button"
                 app:showAsAction="ifRoom" />
             <item
                 android:id="@+id/action_therapist_switch_role"
                 android:icon="@drawable/ic_switch_role"
-                android:title="Switch Role"
+                android:title="@string/switch_role_text"
                 app:showAsAction="ifRoom" />
         </menu>
     </item>
