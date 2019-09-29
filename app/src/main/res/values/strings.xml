@@ -11,11 +11,11 @@
     <string name="invalid_password">Enter a valid password</string>
     <string name="authentication_fail">Authentication failed!</string>
     <string name="authentication_success">Authentication successful!</string>
-    <string name="authenticating_text">Authenticating...</string>
+    <string name="authenticating_text">Authenticating…</string>
     <string name="scan_user_tag_helptext">Hold your phone near the NFC tag.</string>
     <string name="scan_nfc_text">Scan Your Issued NFC Tag</string>
     <string name="cancel_text">Cancel</string>
-    <string name="loading_text">Loading...</string>
+    <string name="loading_text">Loading…</string>
     <string name="weblogin_button">Web Login</string>
     <string name="weblogin_success">Web login successful!</string>
     <string name="select_role_button">Select Role</string>
@@ -23,4 +23,22 @@
     <string name="weblogin_fail">The web app did not trigger an MFA login!</string>
     <string name="m">3qqX8gbcnwDe3yGyJRStttFjlPxwr9xkvv+W0I3ToVFgIdW9YPhzzkAOs9qGw2likBcXS+TfGRna90FS5QZdPNCKju6nbu+SSoYjo5047PwChG9w4Ofy9PZyPdbyHktWo8BEQx9SeAn1h181p2zInnzLA6Oh1sJPWpnDFIurwtU=</string>
     <string name="e">AQAB</string>
+    <string name="return_text">Return</string>
+    <string name="patient_upload_record_text">Upload Record</string>
+    <string name="record_title">Record Title (max 45 characters)</string>
+    <string name="record_title_example">i.e. My Blood Pressure</string>
+    <string name="record_description">Record Description (max 120 characters)</string>
+    <string name="record_description_hint">Enter description here…</string>
+    <string name="record_type_text">Record Type</string>
+    <string name="content_text">Content</string>
+    <string name="record_content_hint">Enter value here…</string>
+    <string name="record_select_file">Select File</string>
+    <string name="upload_text">Upload</string>
+    <string name="patient_text">Patient</string>
+    <string name="therapist_text">Therapist</string>
+    <string name="therapist_upload_record_text">Upload Record (for normal patient)</string>
+    <string name="therapist_upload_emergency_record_text">Upload Record (for emergency patient)</string>
+    <string name="therapist_scan_nfc_text">Scan NFC (for emergency patient)</string>
+    <string name="my_profile_text">My Profile</string>
+    <string name="switch_role_text">Switch Role</string>
 </resources>

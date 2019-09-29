@@ -10,7 +10,7 @@
         android:id="@+id/patientUploadButton"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:text="Upload Record"
+        android:text="@string/patient_upload_record_text"
         android:textAllCaps="false"
         android:layout_marginTop="200dp"
         app:layout_constraintEnd_toEndOf="parent"
