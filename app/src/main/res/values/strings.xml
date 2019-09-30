@@ -41,4 +41,7 @@
     <string name="therapist_scan_nfc_text">Scan NFC (for emergency patient)</string>
     <string name="my_profile_text">My Profile</string>
     <string name="switch_role_text">Switch Role</string>
+    <string name="systolic_text">Systolic…</string>
+    <string name="diastolic_text">Diastolic…</string>
+    <string name="slash_text">/</string>
 </resources>
