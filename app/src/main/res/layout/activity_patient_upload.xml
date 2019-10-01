@@ -90,29 +90,106 @@
         app:layout_constraintTop_toBottomOf="@+id/patientRecordContentText" />
 
     <EditText
-        android:id="@+id/patientUploadContentField"
+        android:id="@+id/patientUploadHeightField"
         android:layout_width="300dp"
         android:layout_height="40dp"
         android:layout_marginTop="10dp"
         android:ems="10"
         android:hint="@string/record_content_hint"
-        android:inputType="textShortMessage"
+        android:inputType="number|numberDecimal"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/patientRecordContentConstraintText"
         tools:ignore="Autofill" />
 
+    <EditText
+        android:id="@+id/patientUploadWeightField"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="@string/record_content_hint"
+        android:inputType="number|numberDecimal"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/patientRecordContentConstraintText"
+        tools:ignore="Autofill" />
+
+    <EditText
+        android:id="@+id/patientUploadTemperatureField"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="@string/record_content_hint"
+        android:inputType="number|numberDecimal"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/patientRecordContentConstraintText"
+        tools:ignore="Autofill" />
+
+    <EditText
+        android:id="@+id/patientUploadSBPField"
+        android:layout_width="130dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="@string/systolic_text"
+        android:inputType="number"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="@id/patientRecordContentText"
+        app:layout_constraintTop_toBottomOf="@+id/patientRecordContentConstraintText"
+        tools:ignore="Autofill" />
+
+    <TextView
+        android:id="@+id/patientRecordBPSlashText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/slash_text"
+        android:textSize="20sp"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="19dp"
+        android:visibility="invisible"
+        app:layout_constraintLeft_toRightOf="@id/patientUploadSBPField"
+        app:layout_constraintTop_toBottomOf="@+id/patientRecordContentConstraintText" />
+
+    <EditText
+        android:id="@+id/patientUploadDBPField"
+        android:layout_width="130dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="40dp"
+        android:ems="10"
+        android:hint="@string/diastolic_text"
+        android:inputType="number"
+        android:visibility="invisible"
+        app:layout_constraintLeft_toRightOf="@id/patientUploadSBPField"
+        app:layout_constraintTop_toBottomOf="@+id/patientRecordContentConstraintText"
+        tools:ignore="Autofill" />
+
+    <TextView
+        android:id="@+id/patientFileNameText"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/design_default_color_primary"
+        android:layout_marginTop="10dp"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="@+id/patientRecordContentConstraintText"
+        app:layout_constraintTop_toBottomOf="@+id/patientRecordContentConstraintText" />
+
     <Button
         android:id="@+id/patientUploadFileButton"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:text="@string/record_select_file"
         android:textAllCaps="false"
         android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="@+id/patientRecordContentConstraintText"
-        app:layout_constraintTop_toBottomOf="@+id/patientRecordContentConstraintText" />
+        app:layout_constraintStart_toStartOf="@+id/patientFileNameText"
+        app:layout_constraintTop_toBottomOf="@+id/patientFileNameText" />
 
     <Button
         android:id="@+id/patientCancelButton"

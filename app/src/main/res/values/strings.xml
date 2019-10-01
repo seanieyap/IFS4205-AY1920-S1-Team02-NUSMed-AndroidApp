@@ -36,9 +36,12 @@
     <string name="upload_text">Upload</string>
     <string name="patient_text">Patient</string>
     <string name="therapist_text">Therapist</string>
-    <string name="therapist_upload_record_text">Upload Record (for normal patient)</string>
-    <string name="therapist_upload_emergency_record_text">Upload Record (for emergency patient)</string>
-    <string name="therapist_scan_nfc_text">Scan NFC (for emergency patient)</string>
+    <string name="therapist_upload_record_text">Upload Record\n(for normal patient)</string>
+    <string name="therapist_upload_emergency_record_text">Upload Record\n(for emergency patient)</string>
+    <string name="therapist_scan_nfc_text">Scan NFC\n(for emergency patient)</string>
     <string name="my_profile_text">My Profile</string>
     <string name="switch_role_text">Switch Role</string>
+    <string name="systolic_text">Systolic…</string>
+    <string name="diastolic_text">Diastolic…</string>
+    <string name="slash_text">/</string>
 </resources>
