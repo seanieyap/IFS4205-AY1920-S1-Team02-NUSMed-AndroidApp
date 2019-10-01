@@ -109,18 +109,96 @@
         app:layout_constraintTop_toBottomOf="@+id/therapistERecordContentText" />
 
     <EditText
-        android:id="@+id/therapistEUploadContentField"
+        android:id="@+id/therapistEUploadHeightField"
         android:layout_width="300dp"
         android:layout_height="40dp"
         android:layout_marginTop="10dp"
         android:ems="10"
         android:hint="@string/record_content_hint"
-        android:inputType="textShortMessage"
+        android:inputType="number|numberDecimal"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/therapistERecordContentConstraintText"
         tools:ignore="Autofill" />
+
+    <EditText
+        android:id="@+id/therapistEUploadWeightField"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="@string/record_content_hint"
+        android:inputType="number|numberDecimal"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordContentConstraintText"
+        tools:ignore="Autofill" />
+
+    <EditText
+        android:id="@+id/therapistEUploadTemperatureField"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="@string/record_content_hint"
+        android:inputType="number|numberDecimal"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordContentConstraintText"
+        tools:ignore="Autofill" />
+
+    <EditText
+        android:id="@+id/therapistEUploadSBPField"
+        android:layout_width="130dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="@string/systolic_text"
+        android:inputType="number"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="@id/therapistERecordContentConstraintText"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordContentConstraintText"
+        tools:ignore="Autofill" />
+
+    <TextView
+        android:id="@+id/therapistERecordBPSlashText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/slash_text"
+        android:textSize="20sp"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="19dp"
+        android:visibility="invisible"
+        app:layout_constraintLeft_toRightOf="@id/therapistEUploadSBPField"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordContentConstraintText" />
+
+    <EditText
+        android:id="@+id/therapistEUploadDBPField"
+        android:layout_width="130dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="40dp"
+        android:ems="10"
+        android:hint="@string/diastolic_text"
+        android:inputType="number"
+        android:visibility="invisible"
+        app:layout_constraintLeft_toRightOf="@id/therapistEUploadSBPField"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordContentConstraintText"
+        tools:ignore="Autofill" />
+
+    <TextView
+        android:id="@+id/therapistEFileNameText"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/design_default_color_primary"
+        android:layout_marginTop="10dp"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="@+id/therapistERecordContentConstraintText"
+        app:layout_constraintTop_toBottomOf="@+id/therapistERecordContentConstraintText" />
 
     <Button
         android:id="@+id/therapistEUploadFileButton"
@@ -130,8 +208,8 @@
         android:text="@string/record_select_file"
         android:textAllCaps="false"
         android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="@+id/therapistERecordContentConstraintText"
-        app:layout_constraintTop_toBottomOf="@+id/therapistERecordContentConstraintText" />
+        app:layout_constraintStart_toStartOf="@+id/therapistEFileNameText"
+        app:layout_constraintTop_toBottomOf="@+id/therapistEFileNameText" />
 
     <Button
         android:id="@+id/therapistECancelButton"
