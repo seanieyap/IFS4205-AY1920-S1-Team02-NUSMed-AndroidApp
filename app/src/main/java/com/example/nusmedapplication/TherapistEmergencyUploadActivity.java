@@ -1,6 +1,8 @@
 package com.example.nusmedapplication;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -91,7 +93,11 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finish();
+                if (isPageEdited()) {
+                    confirmCancel();
+                } else {
+                    finish();
+                }
             }
         });
 
@@ -645,5 +651,102 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
 
     @Override
     public void onNothingSelected(AdapterView<?> arg0) {
+    }
+
+    public boolean isPageEdited() {
+        EditText titleInput = findViewById(R.id.therapistERecordTitleField);
+        if (!titleInput.getText().toString().isEmpty()) {
+            return true;
+        }
+
+        EditText descriptionInput = findViewById(R.id.therapistERecordDescriptionField);
+        if (!descriptionInput.getText().toString().isEmpty()) {
+            return true;
+        }
+
+        Spinner recordTypeSpinner = findViewById(R.id.therapistERecordTypeSpinner);
+        switch (recordTypeSpinner.getSelectedItem().toString()) {
+            case RecordType.HEIGHT_MEASUREMENT:
+                EditText heightInput = findViewById(R.id.therapistEUploadHeightField);
+                if (!heightInput.getText().toString().equals("0")) {
+                    return true;
+                }
+                break;
+            case RecordType.WEIGHT_MEASUREMENT:
+                EditText weightInput = findViewById(R.id.therapistEUploadWeightField);
+                if (!weightInput.getText().toString().equals("0")) {
+                    return true;
+                }
+                break;
+            case RecordType.TEMPERATURE:
+                EditText tempInput = findViewById(R.id.therapistEUploadTemperatureField);
+                if (!tempInput.getText().toString().equals("0")) {
+                    return true;
+                }
+                break;
+            case RecordType.BLOOD_PRESSURE:
+                EditText spInput = findViewById(R.id.therapistEUploadSBPField);
+                EditText dpInput = findViewById(R.id.therapistEUploadDBPField);
+                if (!spInput.getText().toString().equals("0") || !dpInput.getText().toString().equals("0")) {
+                    return true;
+                }
+                break;
+            case RecordType.ECG:
+                TextView ecgFileText = findViewById(R.id.therapistEFileNameText);
+                if ((ecgFileText.getVisibility() == View.VISIBLE) && !ecgFileText.getText().toString().isEmpty()) {
+                    return true;
+                }
+                break;
+            case RecordType.MRI:
+                TextView mriFileText = findViewById(R.id.therapistEFileNameText);
+                if ((mriFileText.getVisibility() == View.VISIBLE) && !mriFileText.getText().toString().isEmpty()) {
+                    return true;
+                }
+                break;
+            case RecordType.X_RAY:
+                TextView xrayFileText = findViewById(R.id.therapistEFileNameText);
+                if ((xrayFileText.getVisibility() == View.VISIBLE) && !xrayFileText.getText().toString().isEmpty()) {
+                    return true;
+                }
+                break;
+            case RecordType.GAIT:
+                TextView gaitFileText = findViewById(R.id.therapistEFileNameText);
+                if ((gaitFileText.getVisibility() == View.VISIBLE) && !gaitFileText.getText().toString().isEmpty()) {
+                    return true;
+                }
+                break;
+        }
+
+        return false;
+    }
+
+    public void confirmCancel() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(true);
+        builder.setTitle("Confirm Cancel");
+        builder.setMessage("Are you sure you want to cancel the record upload? All the information entered in this page will be lost.");
+        builder.setPositiveButton("YES",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                });
+        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isPageEdited()) {
+            confirmCancel();
+        } else {
+            super.onBackPressed();
+        }
     }
 }
