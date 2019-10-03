@@ -29,6 +29,7 @@ import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.math.BigInteger;
@@ -63,6 +64,7 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
     public static final int READ_REQUEST_CODE = 42;
 
     private int fileSize = 0;
+    private byte[] fileBytes = null;
 
     String[] recordTypes = {
             RecordType.HEIGHT_MEASUREMENT,
@@ -278,9 +280,20 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                         TextView fileNameText = findViewById(R.id.patientFileNameText);
                         fileNameText.setVisibility(View.VISIBLE);
                         fileNameText.setText(displayName);
+
+                        // Retrieve the valid file size
                         fileSize = Integer.parseInt(size);
+
+                        // Retrieve the valid file content
+                        byte[] bytes = new byte[fileSize];
+                        InputStream inputStream = getContentResolver().openInputStream(uri);
+                        inputStream.read(bytes);
+                        inputStream.close();
+                        fileBytes = bytes;
                     }
                 }
+            } catch (Exception e) {
+                Log.e(TAG, "An exception occurred...", e);
             } finally {
                 assert cursor != null;
                 cursor.close();
@@ -339,9 +352,20 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                         TextView fileNameText = findViewById(R.id.patientFileNameText);
                         fileNameText.setVisibility(View.VISIBLE);
                         fileNameText.setText(displayName);
+
+                        // Retrieve the valid file size
                         fileSize = Integer.parseInt(size);
+
+                        // Retrieve the valid file content
+                        byte[] bytes = new byte[fileSize];
+                        InputStream inputStream = getContentResolver().openInputStream(uri);
+                        inputStream.read(bytes);
+                        inputStream.close();
+                        fileBytes = bytes;
                     }
                 }
+            } catch (Exception e) {
+                Log.e(TAG, "An exception occurred...", e);
             } finally {
                 assert cursor != null;
                 cursor.close();
@@ -400,9 +424,20 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                         TextView fileNameText = findViewById(R.id.patientFileNameText);
                         fileNameText.setVisibility(View.VISIBLE);
                         fileNameText.setText(displayName);
+
+                        // Retrieve the valid file size
                         fileSize = Integer.parseInt(size);
+
+                        // Retrieve the valid file content
+                        byte[] bytes = new byte[fileSize];
+                        InputStream inputStream = getContentResolver().openInputStream(uri);
+                        inputStream.read(bytes);
+                        inputStream.close();
+                        fileBytes = bytes;
                     }
                 }
+            } catch (Exception e) {
+                Log.e(TAG, "An exception occurred...", e);
             } finally {
                 assert cursor != null;
                 cursor.close();
@@ -461,9 +496,20 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                         TextView fileNameText = findViewById(R.id.patientFileNameText);
                         fileNameText.setVisibility(View.VISIBLE);
                         fileNameText.setText(displayName);
+
+                        // Retrieve the valid file size
                         fileSize = Integer.parseInt(size);
+
+                        // Retrieve the valid file content
+                        byte[] bytes = new byte[fileSize];
+                        InputStream inputStream = getContentResolver().openInputStream(uri);
+                        inputStream.read(bytes);
+                        inputStream.close();
+                        fileBytes = bytes;
                     }
                 }
+            } catch (Exception e) {
+                Log.e(TAG, "An exception occurred...", e);
             } finally {
                 assert cursor != null;
                 cursor.close();
@@ -912,6 +958,7 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                     break;
             }
 
+            // TODO: put file content (byte[]) in json
             String jsonCredentialsString = String.format(
                     "{'deviceID': '%s', 'jwt': '%s', 'title': '%s', 'description': '%s', 'type': '%s', 'content': '%s', 'fileName': '%s', 'fileExtension': '%s', 'fileSize': %d}",
                     deviceID, jwt, title, desc, type, content, fileName, fileExtension, fileSize);
