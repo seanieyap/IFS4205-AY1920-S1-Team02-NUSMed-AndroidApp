@@ -2,14 +2,18 @@ package com.example.nusmedapplication;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -21,28 +25,44 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.spec.RSAPublicKeySpec;
 
 public class PatientUploadActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     private static final String TAG = "DEBUG - PatientUpload";
 
-    private static final int RECORD_TITLE_MAX_LENGTH = 45;
-    private static final int RECORD_DESCRIPTION_MAX_LENGTH = 120;
+    public static final int RECORD_TITLE_MAX_LENGTH = 45;
+    public static final int RECORD_DESCRIPTION_MAX_LENGTH = 120;
 
-    private static final int HEIGHT_MIN_VALUE = 0;
-    private static final int HEIGHT_MAX_VALUE = 280;
-    private static final int WEIGHT_MIN_VALUE = 0;
-    private static final int WEIGHT_MAX_VALUE = 650;
-    private static final int TEMPERATURE_MIN_VALUE = 0;
-    private static final int TEMPERATURE_MAX_VALUE = 100;
-    private static final int BP_MIN_VALUE = 0;
-    private static final int BP_MAX_VALUE = 250;
+    public static final int HEIGHT_MIN_VALUE = 0;
+    public static final int HEIGHT_MAX_VALUE = 280;
+    public static final int WEIGHT_MIN_VALUE = 0;
+    public static final int WEIGHT_MAX_VALUE = 650;
+    public static final int TEMPERATURE_MIN_VALUE = 0;
+    public static final int TEMPERATURE_MAX_VALUE = 100;
+    public static final int BP_MIN_VALUE = 0;
+    public static final int BP_MAX_VALUE = 250;
 
-    private static final int FILE_SIZE_512KB = 524288;
-    private static final int FILE_SIZE_5MB = 5242880;
-    private static final int FILE_SIZE_50MB = 52428800;
+    public static final int FILE_SIZE_512KB = 524288;
+    public static final int FILE_SIZE_5MB = 5242880;
+    public static final int FILE_SIZE_50MB = 52428800;
 
-    private static final int READ_REQUEST_CODE = 42;
+    public static final int READ_REQUEST_CODE = 42;
+
+    private int fileSize = 0;
 
     String[] recordTypes = {
             RecordType.HEIGHT_MEASUREMENT,
@@ -79,6 +99,15 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                 } else {
                     finish();
                 }
+            }
+        });
+
+        Button uploadButton = findViewById(R.id.patientSubmitButton);
+        uploadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                RecordUploadTask recordUploadTask = new RecordUploadTask();
+                recordUploadTask.execute();
             }
         });
 
@@ -249,6 +278,7 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                         TextView fileNameText = findViewById(R.id.patientFileNameText);
                         fileNameText.setVisibility(View.VISIBLE);
                         fileNameText.setText(displayName);
+                        fileSize = Integer.parseInt(size);
                     }
                 }
             } finally {
@@ -309,6 +339,7 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                         TextView fileNameText = findViewById(R.id.patientFileNameText);
                         fileNameText.setVisibility(View.VISIBLE);
                         fileNameText.setText(displayName);
+                        fileSize = Integer.parseInt(size);
                     }
                 }
             } finally {
@@ -369,6 +400,7 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                         TextView fileNameText = findViewById(R.id.patientFileNameText);
                         fileNameText.setVisibility(View.VISIBLE);
                         fileNameText.setText(displayName);
+                        fileSize = Integer.parseInt(size);
                     }
                 }
             } finally {
@@ -429,6 +461,7 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                         TextView fileNameText = findViewById(R.id.patientFileNameText);
                         fileNameText.setVisibility(View.VISIBLE);
                         fileNameText.setText(displayName);
+                        fileSize = Integer.parseInt(size);
                     }
                 }
             } finally {
@@ -727,6 +760,265 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
             super.onBackPressed();
         }
     }
+
+    private boolean isValidTitle(String title) {
+        if (title.length() == 0 || title.length() > RECORD_TITLE_MAX_LENGTH) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isValidDescription(String desc) {
+        if (desc.length() == 0 || desc.length() > RECORD_DESCRIPTION_MAX_LENGTH) {
+            return false;
+        }
+        return true;
+    }
+
+    private int uploadRecord() {
+
+        int responseCode = 409;
+
+        try {
+            String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+
+            SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
+                    "secret_shared_prefs",
+                    masterKeyAlias,
+                    getApplicationContext(),
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+
+            String deviceID = sharedPreferences.getString("deviceID", null);
+            String jwt = sharedPreferences.getString("jwt", null);
+
+            URL url = new URL("https://ifs4205team2-1.comp.nus.edu.sg/api/record/patient/upload");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; utf-8");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoOutput(true);
+
+            // Get and check record information
+            EditText titleInput = findViewById(R.id.patientRecordTitleField);
+            String title = titleInput.getText().toString();
+            if (!isValidTitle(title)) {
+                return responseCode;
+            }
+
+            EditText descInput = findViewById(R.id.patientRecordDescriptionField);
+            String desc = descInput.getText().toString();
+            if (!isValidDescription(desc)) {
+                return responseCode;
+            }
+
+            Spinner typeSpinner = findViewById(R.id.patientRecordTypeSpinner);
+            String type = typeSpinner.getSelectedItem().toString();
+            String content = "";
+            String fileName = "";
+            String fileExtension = "";
+            switch (type) {
+                case RecordType.HEIGHT_MEASUREMENT:
+                    EditText heightInput = findViewById(R.id.patientUploadHeightField);
+                    content = heightInput.getText().toString();
+
+                    if (!HeightMeasurement.isContentValid(content)) {
+                        return responseCode;
+                    }
+                    break;
+                case RecordType.WEIGHT_MEASUREMENT:
+                    EditText weightInput = findViewById(R.id.patientUploadWeightField);
+                    content = weightInput.getText().toString();
+
+                    if (!WeightMeasurement.isContentValid(content)) {
+                        return responseCode;
+                    }
+                    break;
+                case RecordType.TEMPERATURE:
+                    EditText tempInput = findViewById(R.id.patientUploadTemperatureField);
+                    content = tempInput.getText().toString();
+
+                    if (!Temperature.isContentValid(content)) {
+                        return responseCode;
+                    }
+                    break;
+                case RecordType.BLOOD_PRESSURE:
+                    EditText spInput = findViewById(R.id.patientUploadSBPField);
+                    content = spInput.getText().toString();
+                    content += "/";
+                    EditText bpInput = findViewById(R.id.patientUploadDBPField);
+                    content += bpInput.getText().toString();
+
+                    if (!BloodPressure.isContentValid(content)) {
+                        return responseCode;
+                    }
+                    break;
+                case RecordType.ECG:
+                    TextView ecgNameText = findViewById(R.id.patientFileNameText);
+                    fileName = ecgNameText.getText().toString();
+
+                    if (ecgNameText.getVisibility() == View.INVISIBLE || fileName.isEmpty()) {
+                        return responseCode;
+                    }
+
+                    fileExtension = fileName.substring(fileName.lastIndexOf("."));
+
+                    if (!ECG.isFileValid(fileExtension, fileSize)) {
+                        return responseCode;
+                    }
+                    break;
+                case RecordType.MRI:
+                    TextView mriNameText = findViewById(R.id.patientFileNameText);
+                    fileName = mriNameText.getText().toString();
+
+                    if (mriNameText.getVisibility() == View.INVISIBLE || fileName.isEmpty()) {
+                        return responseCode;
+                    }
+
+                    fileExtension = fileName.substring(fileName.lastIndexOf("."));
+
+                    if (!MRI.isFileValid(fileExtension, fileSize)) {
+                        return responseCode;
+                    }
+                    break;
+                case RecordType.X_RAY:
+                    TextView xrayNameText = findViewById(R.id.patientFileNameText);
+                    fileName = xrayNameText.getText().toString();
+
+                    if (xrayNameText.getVisibility() == View.INVISIBLE || fileName.isEmpty()) {
+                        return responseCode;
+                    }
+
+                    fileExtension = fileName.substring(fileName.lastIndexOf("."));
+
+                    if (!Xray.isFileValid(fileExtension, fileSize)) {
+                        return responseCode;
+                    }
+                    break;
+                case RecordType.GAIT:
+                    TextView gaitNameText = findViewById(R.id.patientFileNameText);
+                    fileName = gaitNameText.getText().toString();
+
+                    if (gaitNameText.getVisibility() == View.INVISIBLE || fileName.isEmpty()) {
+                        return responseCode;
+                    }
+
+                    fileExtension = fileName.substring(fileName.lastIndexOf("."));
+
+                    if (!Gait.isFileValid(fileExtension, fileSize)) {
+                        return responseCode;
+                    }
+                    break;
+            }
+
+            String jsonCredentialsString = String.format(
+                    "{'deviceID': '%s', 'jwt': '%s', 'title': '%s', 'description': '%s', 'type': '%s', 'content': '%s', 'fileName': '%s', 'fileExtension': '%s', 'fileSize': %d}",
+                    deviceID, jwt, title, desc, type, content, fileName, fileExtension, fileSize);
+
+            OutputStream os = conn.getOutputStream();
+            byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
+            os.write(jsonCredentialsBytes, 0, jsonCredentialsBytes.length);
+
+            responseCode = conn.getResponseCode();
+            Log.d(TAG, "uploadRecord() :: responseCode: " + Integer.toString(responseCode));
+
+            switch (responseCode) {
+                case 200:
+                    // Read JWT from response
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String currentLine;
+                    while ((currentLine = in.readLine()) != null) {
+                        response.append(currentLine);
+                    }
+                    in.close();
+
+                    String newJwt = response.toString().replace("\"", "");;
+                    Log.d(TAG, "uploadRecord() :: newJwt: " + newJwt);
+
+                    // Separate JWT into header, claims and signature
+                    String[] newJwtParts = newJwt.split("\\.");
+                    String claims = newJwtParts[0];
+                    String signature = newJwtParts[1];
+
+                    // Verify signature in JWT
+                    byte[] modulusBytes = Base64.decode(getString(R.string.m), Base64.DEFAULT);
+                    byte[] exponentBytes = Base64.decode(getString(R.string.e), Base64.DEFAULT);
+                    BigInteger modulus = new BigInteger(1, modulusBytes);
+                    BigInteger exponent = new BigInteger(1, exponentBytes);
+
+                    RSAPublicKeySpec rsaPubKey = new RSAPublicKeySpec(modulus, exponent);
+                    KeyFactory kf = KeyFactory.getInstance("RSA");
+                    PublicKey pubKey = kf.generatePublic(rsaPubKey);
+
+                    Signature signCheck = Signature.getInstance("SHA256withRSA");
+                    signCheck.initVerify(pubKey);
+                    signCheck.update(Base64.decode(claims, Base64.DEFAULT));
+                    boolean validSig = signCheck.verify(Base64.decode(signature, Base64.DEFAULT));
+
+                    if (validSig) {
+                        // Store JWT in EncryptedSharedPreferences
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("jwt", newJwt);
+                        editor.apply();
+                    }
+
+                    break;
+                case 401:
+                    break;
+                case 403:
+                    break;
+                case 500:
+                    break;
+                default:
+                    break;
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "An exception occurred...", e);
+        }
+        return responseCode;
+    }
+
+    private class RecordUploadTask extends AsyncTask<String, Void, Integer> {
+
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(PatientUploadActivity.this);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setMessage("Uploading...");
+            progressDialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(String... strings) {
+            return uploadRecord();
+        }
+
+        @Override
+        protected void onPostExecute(Integer responseCode) {
+            progressDialog.dismiss();
+
+            switch (responseCode) {
+                case 200:
+                    Toast.makeText(getApplicationContext(), "Record upload successful", Toast.LENGTH_SHORT).show();
+                    finish();
+                    break;
+                case 409:
+                    Toast.makeText(getApplicationContext(), "Invalid inputs", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    Toast.makeText(getApplicationContext(), "Record upload failed", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    }
 }
 
 abstract class RecordType {
@@ -798,7 +1090,7 @@ class HeightMeasurement extends RecordType {
             return false;
         }
 
-        int contentDecimal = Integer.parseInt(content);
+        double contentDecimal = Double.parseDouble(content);
         if (contentDecimal >= 0 && contentDecimal <= 280) {
             return true;
         }
@@ -833,7 +1125,7 @@ class WeightMeasurement extends RecordType {
             return false;
         }
 
-        int contentDecimal = Integer.parseInt(content);
+        double contentDecimal = Double.parseDouble(content);
         if (contentDecimal >= 0 && contentDecimal <= 650) {
             return true;
         }
@@ -868,7 +1160,7 @@ class Temperature extends RecordType {
             return false;
         }
 
-        int contentDecimal = Integer.parseInt(content);
+        double contentDecimal = Double.parseDouble(content);
         if (contentDecimal >= 0 && contentDecimal <= 100) {
             return true;
         }
@@ -908,6 +1200,10 @@ class BloodPressure extends RecordType {
             return false;
         }
 
+        if (contents[0].isEmpty() || contents[1].isEmpty()) {
+            return false;
+        }
+
         int systolicPressure = Integer.parseInt(contents[0]);
         int distolicPressure = Integer.parseInt(contents[1]);
         if (systolicPressure >= 0 && systolicPressure <= 250 && distolicPressure >= 0 && distolicPressure <= 250) {
@@ -939,7 +1235,10 @@ class ECG extends RecordType {
         return false;
     }
 
-    public static boolean isFileValid(String file) {
+    public static boolean isFileValid(String extension, int size) {
+        if (extension.equals(".txt") && size <= PatientUploadActivity.FILE_SIZE_512KB) {
+            return true;
+        }
         return false;
     }
 }
@@ -966,7 +1265,11 @@ class MRI extends RecordType {
         return false;
     }
 
-    public static boolean isFileValid(String file) {
+    public static boolean isFileValid(String extension, int size) {
+        if ((extension.equals(".jpg") || extension.equals(".jpeg") || extension.equals(".png"))
+                && size <= PatientUploadActivity.FILE_SIZE_5MB) {
+            return true;
+        }
         return false;
     }
 }
@@ -993,7 +1296,11 @@ class Xray extends RecordType {
         return false;
     }
 
-    public static boolean isFileValid(String file) {
+    public static boolean isFileValid(String extension, int size) {
+        if ((extension.equals(".jpg") || extension.equals(".jpeg") || extension.equals(".png"))
+                && size <= PatientUploadActivity.FILE_SIZE_5MB) {
+            return true;
+        }
         return false;
     }
 }
@@ -1020,7 +1327,11 @@ class Gait extends RecordType {
         return false;
     }
 
-    public static boolean isFileValid(String file) {
+    public static boolean isFileValid(String extension, int size) {
+        if ((extension.equals(".txt") && size <= PatientUploadActivity.FILE_SIZE_512KB)
+                || (extension.equals(".mp4") && size <= PatientUploadActivity.FILE_SIZE_50MB)) {
+            return true;
+        }
         return false;
     }
 }
