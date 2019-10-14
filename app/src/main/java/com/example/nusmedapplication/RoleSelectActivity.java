@@ -20,6 +20,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
+
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -33,12 +39,6 @@ import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.RSAPublicKeySpec;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKeys;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.NFC;
@@ -82,6 +82,7 @@ public class RoleSelectActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         role = intent.getStringExtra("role");
+        Log.d(TAG, "Role: " + role);
 
         if (role == null) {
             RoleSelectTask roleSelectTask = new RoleSelectTask();

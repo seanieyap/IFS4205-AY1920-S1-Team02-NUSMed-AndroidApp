@@ -54,12 +54,8 @@
             android:label="Therapist Page">
         </activity>
         <activity
-            android:name=".TherapistNormalUploadActivity"
+            android:name=".TherapistUploadActivity"
             android:label="Upload Record for Patient">
-        </activity>
-        <activity
-            android:name=".TherapistEmergencyUploadActivity"
-            android:label="Upload Record for Emergency Patient">
         </activity>
         <activity
             android:name=".MyProfileActivity"

@@ -17,30 +17,17 @@ public class TherapistActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_therapist);
 
-        Button uploadNormalButton = findViewById(R.id.therapistUploadNormalButton);
-        uploadNormalButton.setOnClickListener(new View.OnClickListener() {
+        Button uploadButton = findViewById(R.id.therapistUploadButton);
+        uploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getTherapistNormalUploadPage();
-            }
-        });
-
-        Button uploadEmergencyButton = findViewById(R.id.therapistUploadEmergencyButton);
-        uploadEmergencyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getTherapistEmergencyUploadPage();
+                getTherapistUploadPage();
             }
         });
     }
 
-    public void getTherapistNormalUploadPage() {
-        Intent intent = new Intent(this, TherapistNormalUploadActivity.class);
-        startActivity(intent);
-    }
-
-    public void getTherapistEmergencyUploadPage() {
-        Intent intent = new Intent(this, TherapistEmergencyUploadActivity.class);
+    public void getTherapistUploadPage() {
+        Intent intent = new Intent(this, TherapistUploadActivity.class);
         startActivity(intent);
     }
 

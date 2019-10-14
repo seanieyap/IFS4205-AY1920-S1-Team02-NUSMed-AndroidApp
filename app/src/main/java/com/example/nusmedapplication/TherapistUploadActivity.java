@@ -22,9 +22,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class TherapistEmergencyUploadActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class TherapistUploadActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
-    private static final String TAG = "DEBUG - TherEUpload";
+    private static final String TAG = "DEBUG - TherapistUpload";
 
     private static final int RECORD_TITLE_MAX_LENGTH = 45;
     private static final int RECORD_DESCRIPTION_MAX_LENGTH = 120;
@@ -44,7 +44,7 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
 
     private static final int READ_REQUEST_CODE = 42;
 
-    // TODO: get emergency patients list of the therapist from the server
+    // TODO: get patients list of the therapist from the server
     String[] patients = {
             "F0095679N",
             "F0194653X",
@@ -67,10 +67,10 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_therapist_emergency_upload);
+        setContentView(R.layout.activity_therapist_upload);
 
         // Getting the instance of Spinner and applying OnItemSelectedListener on it
-        final Spinner recordTypeSpinner = (Spinner) findViewById(R.id.therapistERecordTypeSpinner);
+        final Spinner recordTypeSpinner = (Spinner) findViewById(R.id.therapistRecordTypeSpinner);
         recordTypeSpinner.setOnItemSelectedListener(this);
 
         // Creating the ArrayAdapter instance having the bank name list
@@ -80,7 +80,7 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
         recordTypeSpinner.setAdapter(recordTypeAdapter);
 
         // Getting the instance of Spinner and applying OnItemSelectedListener on it
-        Spinner patientSpinner = (Spinner) findViewById(R.id.therapistEPatientSpinner);
+        Spinner patientSpinner = (Spinner) findViewById(R.id.therapistPatientSpinner);
         patientSpinner.setOnItemSelectedListener(this);
 
         // Creating the ArrayAdapter instance having the bank name list
@@ -89,7 +89,7 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
         // Setting the ArrayAdapter data on the Spinner
         patientSpinner.setAdapter(patientAdapter);
 
-        Button cancelButton = findViewById(R.id.therapistECancelButton);
+        Button cancelButton = findViewById(R.id.therapistCancelButton);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -102,7 +102,7 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
         });
 
         // Check the length of record title
-        final EditText titleInput = findViewById(R.id.therapistERecordTitleField);
+        final EditText titleInput = findViewById(R.id.therapistRecordTitleField);
         titleInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -123,7 +123,7 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
         });
 
         //Check the length of record description
-        final EditText descriptionInput = findViewById(R.id.therapistERecordDescriptionField);
+        final EditText descriptionInput = findViewById(R.id.therapistRecordDescriptionField);
         descriptionInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -143,7 +143,7 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
             }
         });
 
-        Button fileButton = findViewById(R.id.therapistEUploadFileButton);
+        Button fileButton = findViewById(R.id.therapistUploadFileButton);
         fileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -198,7 +198,7 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
                 uri = resultData.getData();
                 Log.i(TAG, "Uri: " + uri.toString());
 
-                Spinner recordTypeSpinner = (Spinner) findViewById(R.id.therapistERecordTypeSpinner);
+                Spinner recordTypeSpinner = (Spinner) findViewById(R.id.therapistRecordTypeSpinner);
                 switch (recordTypeSpinner.getSelectedItem().toString()) {
                     case RecordType.ECG:
                         validateECGMetaData(uri);
@@ -265,7 +265,7 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
                         Toast.makeText(getApplicationContext(), "File too large", Toast.LENGTH_SHORT).show();
                     } else {
                         // Display file name on the app to show ready to upload
-                        TextView fileNameText = findViewById(R.id.therapistEFileNameText);
+                        TextView fileNameText = findViewById(R.id.therapistFileNameText);
                         fileNameText.setVisibility(View.VISIBLE);
                         fileNameText.setText(displayName);
                     }
@@ -325,7 +325,7 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
                         Toast.makeText(getApplicationContext(), "File too large", Toast.LENGTH_SHORT).show();
                     } else {
                         // Display file name on the app to show ready to upload
-                        TextView fileNameText = findViewById(R.id.therapistEFileNameText);
+                        TextView fileNameText = findViewById(R.id.therapistFileNameText);
                         fileNameText.setVisibility(View.VISIBLE);
                         fileNameText.setText(displayName);
                     }
@@ -385,7 +385,7 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
                         Toast.makeText(getApplicationContext(), "File too large", Toast.LENGTH_SHORT).show();
                     } else {
                         // Display file name on the app to show ready to upload
-                        TextView fileNameText = findViewById(R.id.therapistEFileNameText);
+                        TextView fileNameText = findViewById(R.id.therapistFileNameText);
                         fileNameText.setVisibility(View.VISIBLE);
                         fileNameText.setText(displayName);
                     }
@@ -445,7 +445,7 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
                         Toast.makeText(getApplicationContext(), "File too large", Toast.LENGTH_SHORT).show();
                     } else {
                         // Display file name on the app to show ready to upload
-                        TextView fileNameText = findViewById(R.id.therapistEFileNameText);
+                        TextView fileNameText = findViewById(R.id.therapistFileNameText);
                         fileNameText.setVisibility(View.VISIBLE);
                         fileNameText.setText(displayName);
                     }
@@ -461,22 +461,22 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
     @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id) {
         // Set record content constraint
-        TextView constraintText = findViewById(R.id.therapistERecordContentConstraintText);
+        TextView constraintText = findViewById(R.id.therapistRecordContentConstraintText);
         RecordType recordType = RecordType.getRecordType(arg0.getItemAtPosition(position).toString());
 
         if (recordType != null) {
             constraintText.setText(recordType.getConstraint());
 
-            final EditText heightInput = (EditText) findViewById(R.id.therapistEUploadHeightField);
-            final EditText weightInput = (EditText) findViewById(R.id.therapistEUploadWeightField);
-            final EditText temperatureInput = (EditText) findViewById(R.id.therapistEUploadTemperatureField);
-            final EditText sbpInput = (EditText) findViewById(R.id.therapistEUploadSBPField);
-            final EditText dbpInput = (EditText) findViewById(R.id.therapistEUploadDBPField);
-            TextView slashText = (TextView) findViewById(R.id.therapistERecordBPSlashText);
+            final EditText heightInput = (EditText) findViewById(R.id.therapistUploadHeightField);
+            final EditText weightInput = (EditText) findViewById(R.id.therapistUploadWeightField);
+            final EditText temperatureInput = (EditText) findViewById(R.id.therapistUploadTemperatureField);
+            final EditText sbpInput = (EditText) findViewById(R.id.therapistUploadSBPField);
+            final EditText dbpInput = (EditText) findViewById(R.id.therapistUploadDBPField);
+            TextView slashText = (TextView) findViewById(R.id.therapistRecordBPSlashText);
 
             // Upload file button
-            Button fileButton = (Button) findViewById(R.id.therapistEUploadFileButton);
-            TextView fileNameText = (TextView) findViewById(R.id.therapistEFileNameText);
+            Button fileButton = (Button) findViewById(R.id.therapistUploadFileButton);
+            TextView fileNameText = (TextView) findViewById(R.id.therapistFileNameText);
 
             if (recordType.isContent()) {
                 fileButton.setVisibility(View.INVISIBLE);
@@ -654,63 +654,63 @@ public class TherapistEmergencyUploadActivity extends AppCompatActivity implemen
     }
 
     public boolean isPageEdited() {
-        EditText titleInput = findViewById(R.id.therapistERecordTitleField);
+        EditText titleInput = findViewById(R.id.therapistRecordTitleField);
         if (!titleInput.getText().toString().isEmpty()) {
             return true;
         }
 
-        EditText descriptionInput = findViewById(R.id.therapistERecordDescriptionField);
+        EditText descriptionInput = findViewById(R.id.therapistRecordDescriptionField);
         if (!descriptionInput.getText().toString().isEmpty()) {
             return true;
         }
 
-        Spinner recordTypeSpinner = findViewById(R.id.therapistERecordTypeSpinner);
+        Spinner recordTypeSpinner = findViewById(R.id.therapistRecordTypeSpinner);
         switch (recordTypeSpinner.getSelectedItem().toString()) {
             case RecordType.HEIGHT_MEASUREMENT:
-                EditText heightInput = findViewById(R.id.therapistEUploadHeightField);
+                EditText heightInput = findViewById(R.id.therapistUploadHeightField);
                 if (!heightInput.getText().toString().equals("0")) {
                     return true;
                 }
                 break;
             case RecordType.WEIGHT_MEASUREMENT:
-                EditText weightInput = findViewById(R.id.therapistEUploadWeightField);
+                EditText weightInput = findViewById(R.id.therapistUploadWeightField);
                 if (!weightInput.getText().toString().equals("0")) {
                     return true;
                 }
                 break;
             case RecordType.TEMPERATURE:
-                EditText tempInput = findViewById(R.id.therapistEUploadTemperatureField);
+                EditText tempInput = findViewById(R.id.therapistUploadTemperatureField);
                 if (!tempInput.getText().toString().equals("0")) {
                     return true;
                 }
                 break;
             case RecordType.BLOOD_PRESSURE:
-                EditText spInput = findViewById(R.id.therapistEUploadSBPField);
-                EditText dpInput = findViewById(R.id.therapistEUploadDBPField);
+                EditText spInput = findViewById(R.id.therapistUploadSBPField);
+                EditText dpInput = findViewById(R.id.therapistUploadDBPField);
                 if (!spInput.getText().toString().equals("0") || !dpInput.getText().toString().equals("0")) {
                     return true;
                 }
                 break;
             case RecordType.ECG:
-                TextView ecgFileText = findViewById(R.id.therapistEFileNameText);
+                TextView ecgFileText = findViewById(R.id.therapistFileNameText);
                 if ((ecgFileText.getVisibility() == View.VISIBLE) && !ecgFileText.getText().toString().isEmpty()) {
                     return true;
                 }
                 break;
             case RecordType.MRI:
-                TextView mriFileText = findViewById(R.id.therapistEFileNameText);
+                TextView mriFileText = findViewById(R.id.therapistFileNameText);
                 if ((mriFileText.getVisibility() == View.VISIBLE) && !mriFileText.getText().toString().isEmpty()) {
                     return true;
                 }
                 break;
             case RecordType.X_RAY:
-                TextView xrayFileText = findViewById(R.id.therapistEFileNameText);
+                TextView xrayFileText = findViewById(R.id.therapistFileNameText);
                 if ((xrayFileText.getVisibility() == View.VISIBLE) && !xrayFileText.getText().toString().isEmpty()) {
                     return true;
                 }
                 break;
             case RecordType.GAIT:
-                TextView gaitFileText = findViewById(R.id.therapistEFileNameText);
+                TextView gaitFileText = findViewById(R.id.therapistFileNameText);
                 if ((gaitFileText.getVisibility() == View.VISIBLE) && !gaitFileText.getText().toString().isEmpty()) {
                     return true;
                 }
