@@ -64,7 +64,7 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
     public static final int READ_REQUEST_CODE = 42;
 
     private int fileSize = 0;
-    private byte[] fileBytes = null;
+    private String fileContent = "";
 
     String[] recordTypes = {
             RecordType.HEIGHT_MEASUREMENT,
@@ -289,7 +289,9 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                         InputStream inputStream = getContentResolver().openInputStream(uri);
                         inputStream.read(bytes);
                         inputStream.close();
-                        fileBytes = bytes;
+
+                        fileContent = Base64.encodeToString(bytes, Base64.DEFAULT);
+                        Log.i(TAG, "Content: " + fileContent);
                     }
                 }
             } catch (Exception e) {
@@ -361,7 +363,9 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                         InputStream inputStream = getContentResolver().openInputStream(uri);
                         inputStream.read(bytes);
                         inputStream.close();
-                        fileBytes = bytes;
+
+                        fileContent = Base64.encodeToString(bytes, Base64.DEFAULT);
+                        Log.i(TAG, "Content: " + fileContent);
                     }
                 }
             } catch (Exception e) {
@@ -433,7 +437,9 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                         InputStream inputStream = getContentResolver().openInputStream(uri);
                         inputStream.read(bytes);
                         inputStream.close();
-                        fileBytes = bytes;
+
+                        fileContent = Base64.encodeToString(bytes, Base64.DEFAULT);
+                        Log.i(TAG, "Content: " + fileContent);
                     }
                 }
             } catch (Exception e) {
@@ -505,7 +511,9 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                         InputStream inputStream = getContentResolver().openInputStream(uri);
                         inputStream.read(bytes);
                         inputStream.close();
-                        fileBytes = bytes;
+
+                        fileContent = Base64.encodeToString(bytes, Base64.DEFAULT);
+                        Log.i(TAG, "Content: " + fileContent);
                     }
                 }
             } catch (Exception e) {
@@ -958,10 +966,9 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                     break;
             }
 
-            // TODO: put file content (byte[]) in json
             String jsonCredentialsString = String.format(
-                    "{'deviceID': '%s', 'jwt': '%s', 'title': '%s', 'description': '%s', 'type': '%s', 'content': '%s', 'fileName': '%s', 'fileExtension': '%s', 'fileSize': %d}",
-                    deviceID, jwt, title, desc, type, content, fileName, fileExtension, fileSize);
+                    "{'deviceID': '%s', 'jwt': '%s', 'title': '%s', 'description': '%s', 'type': '%s', 'content': '%s', 'fileName': '%s', 'fileExtension': '%s', 'fileSize': %d, 'fileContent': '%s'}",
+                    deviceID, jwt, title, desc, type, content, fileName, fileExtension, fileSize, fileContent);
 
             OutputStream os = conn.getOutputStream();
             byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
