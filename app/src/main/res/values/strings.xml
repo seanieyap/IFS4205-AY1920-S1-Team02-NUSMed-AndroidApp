@@ -43,4 +43,5 @@
     <string name="systolic_text">Systolic…</string>
     <string name="diastolic_text">Diastolic…</string>
     <string name="slash_text">/</string>
+    <string name="no_available_role">No Available Role!</string>
 </resources>

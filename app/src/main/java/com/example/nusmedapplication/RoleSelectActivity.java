@@ -18,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -49,6 +50,7 @@ public class RoleSelectActivity extends AppCompatActivity {
     private static final String TAG = "DEBUG - RoleSelect";
     private static final String ROLE_PATIENT = "10";
     private static final String ROLE_THERAPIST = "01";
+    private static final String ROLE_PATIENT_AND_THERAPIST = "11";
 
     private NfcAdapter nfcAdapter;
     private String role;
@@ -97,12 +99,18 @@ public class RoleSelectActivity extends AppCompatActivity {
         Button therapistButton = findViewById(R.id.roleTherapistButton);
 
         if (ROLE_PATIENT.equals(role)) {
-            therapistButton.setEnabled(false);
+            therapistButton.setVisibility(View.INVISIBLE);
         } else if (ROLE_THERAPIST.equals(role)) {
-            patientButton.setEnabled(false);
-        } else if (role == null) {
-            patientButton.setEnabled(false);
-            therapistButton.setEnabled(false);
+            patientButton.setVisibility(View.INVISIBLE);
+        } else if (ROLE_PATIENT_AND_THERAPIST.equals(role)) {
+            patientButton.setVisibility(View.VISIBLE);
+            therapistButton.setVisibility(View.VISIBLE);
+        } else {
+            therapistButton.setVisibility(View.INVISIBLE);
+            patientButton.setVisibility(View.INVISIBLE);
+
+            TextView noRoleText = findViewById(R.id.noAvailableRoleText);
+            noRoleText.setVisibility(View.VISIBLE);
         }
     }
 
