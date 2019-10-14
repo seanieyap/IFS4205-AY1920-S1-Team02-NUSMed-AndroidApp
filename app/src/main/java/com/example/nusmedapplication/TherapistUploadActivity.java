@@ -44,15 +44,6 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
 
     private static final int READ_REQUEST_CODE = 42;
 
-    // TODO: get patients list of the therapist from the server
-    String[] patients = {
-            "F0095679N",
-            "F0194653X",
-            "F0359848T",
-            "F0398231L",
-            "F0412392P"
-    };
-
     String[] recordTypes = {
             RecordType.HEIGHT_MEASUREMENT,
             RecordType.WEIGHT_MEASUREMENT,
@@ -84,7 +75,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
         patientSpinner.setOnItemSelectedListener(this);
 
         // Creating the ArrayAdapter instance having the bank name list
-        ArrayAdapter patientAdapter = new ArrayAdapter(this,android.R.layout.simple_spinner_item, patients);
+        ArrayAdapter patientAdapter = new ArrayAdapter(this,android.R.layout.simple_spinner_item, TherapistActivity.MY_PATIENTS);
         patientAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Setting the ArrayAdapter data on the Spinner
         patientSpinner.setAdapter(patientAdapter);
