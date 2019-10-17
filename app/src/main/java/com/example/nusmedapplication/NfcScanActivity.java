@@ -316,8 +316,7 @@ public class NfcScanActivity extends AppCompatActivity {
                         "Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.authentication_fail,
                         Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
-                startActivity(intent);
+                finish();
             }
         }
     }
@@ -459,8 +458,7 @@ public class NfcScanActivity extends AppCompatActivity {
                         "nric/password/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.authentication_fail,
                         Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
-                startActivity(intent);
+                finish();
             }
         }
     }
@@ -594,12 +592,10 @@ public class NfcScanActivity extends AppCompatActivity {
 
             switch (responseCode) {
                 case 200:
-                    Log.d(TAG, "WebLoginTask() :: Web Login SUCCESS! Start RoleSelect activity!");
+                    Log.d(TAG, "WebLoginTask() :: Web Login SUCCESS! Return to previous activity!");
                     Toast.makeText(getBaseContext(), R.string.authentication_success,
                             Toast.LENGTH_LONG).show();
-                    intent = new Intent(getApplicationContext(), RoleSelectActivity.class);
-                    intent.putExtra("role", jwtRole);
-                    startActivity(intent);
+                    finish();
                     break;
                 case 401:
                     Log.d(TAG, "WebLoginTask() :: Web Login FAILED! " +
@@ -614,6 +610,7 @@ public class NfcScanActivity extends AppCompatActivity {
                     Toast.makeText(getBaseContext(), R.string.weblogin_fail,
                             Toast.LENGTH_LONG).show();
                     finish();
+                    break;
                 default:
                     break;
             }

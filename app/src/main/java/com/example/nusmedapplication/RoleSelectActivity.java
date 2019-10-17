@@ -64,7 +64,22 @@ public class RoleSelectActivity extends AppCompatActivity {
 
         checkNfc();
 
+        Intent intent = getIntent();
+        role = intent.getStringExtra("role");
+        Log.d(TAG, "onCreate() :: Roles: " + role);
+
+        if (role == null) {
+            RoleSelectTask roleSelectTask = new RoleSelectTask();
+            roleSelectTask.execute();
+        } else {
+            setButtons(role);
+        }
+    }
+
+    private void setButtons(String role) {
         Button patientButton = findViewById(R.id.rolePatientButton);
+        Button therapistButton = findViewById(R.id.roleTherapistButton);
+
         patientButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -73,7 +88,6 @@ public class RoleSelectActivity extends AppCompatActivity {
             }
         });
 
-        Button therapistButton = findViewById(R.id.roleTherapistButton);
         therapistButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -81,22 +95,6 @@ public class RoleSelectActivity extends AppCompatActivity {
                 updateJwtRoleTask.execute(ROLE_THERAPIST);
             }
         });
-
-        Intent intent = getIntent();
-        role = intent.getStringExtra("role");
-        Log.d(TAG, "Role: " + role);
-
-        if (role == null) {
-            RoleSelectTask roleSelectTask = new RoleSelectTask();
-            roleSelectTask.execute();
-        } else {
-            disableButtons();
-        }
-    }
-
-    private void disableButtons() {
-        Button patientButton = findViewById(R.id.rolePatientButton);
-        Button therapistButton = findViewById(R.id.roleTherapistButton);
 
         if (ROLE_PATIENT.equals(role)) {
             therapistButton.setVisibility(View.INVISIBLE);
@@ -385,7 +383,7 @@ public class RoleSelectActivity extends AppCompatActivity {
             progressDialog.dismiss();
             if (jwtRole != null) {
                 role = jwtRole;
-                disableButtons();
+                setButtons(role);
             } else {
                 Log.d(TAG, "RoleSelectTask() :: Authentication FAILED! " +
                         "JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
