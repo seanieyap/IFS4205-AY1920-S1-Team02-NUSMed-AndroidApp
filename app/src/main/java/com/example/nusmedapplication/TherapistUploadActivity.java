@@ -542,6 +542,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
         TextView constraintText = findViewById(R.id.therapistRecordContentConstraintText);
         RecordType recordType = RecordType.getRecordType(arg0.getItemAtPosition(position).toString());
 
+        // Check if it is record type spinner value changes, not patient spinner
         if (recordType != null) {
             constraintText.setText(recordType.getConstraint());
 
@@ -1082,6 +1083,13 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     Toast.makeText(getApplicationContext(), "Record upload successful", Toast.LENGTH_SHORT).show();
                     finish();
                     break;
+                case 403:
+                    Log.d(TAG, "RecordUploadTask() :: Authentication FAILED! " +
+                            "JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                    Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
+                            Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
+                    startActivity(intent);
                 case 409:
                     Toast.makeText(getApplicationContext(), "Invalid inputs", Toast.LENGTH_SHORT).show();
                     break;
