@@ -1090,6 +1090,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                             Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
                     startActivity(intent);
+                    break;
                 case 409:
                     Toast.makeText(getApplicationContext(), "Invalid inputs", Toast.LENGTH_SHORT).show();
                     break;
