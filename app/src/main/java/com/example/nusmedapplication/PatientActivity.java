@@ -66,15 +66,14 @@ public class PatientActivity extends AppCompatActivity {
         int id = item.getItemId();
         switch (id){
             case R.id.action_patient_my_profile:
-                // TODO: implement my profile page
                 Intent profileIntent = new Intent(this, MyProfileActivity.class);
+                profileIntent.putExtra("role", "Patient");
                 startActivity(profileIntent);
                 break;
             case R.id.action_patient_web_login:
                 callNfcScan();
                 break;
             case R.id.action_patient_switch_role:
-                // TODO: actions with the server to switch user role
                 Intent roleIntent = new Intent(this, RoleSelectActivity.class);
                 startActivity(roleIntent);
                 break;

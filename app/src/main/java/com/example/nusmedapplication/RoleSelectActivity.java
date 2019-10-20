@@ -138,8 +138,8 @@ public class RoleSelectActivity extends AppCompatActivity {
         int id = item.getItemId();
         switch (id){
             case R.id.action_role_my_profile:
-                // TODO: implement my profile page
                 Intent profileIntent = new Intent(this, MyProfileActivity.class);
+                profileIntent.putExtra("role", "Not Selected");
                 startActivity(profileIntent);
                 break;
             case R.id.action_role_web_login:

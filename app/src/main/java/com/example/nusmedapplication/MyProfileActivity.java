@@ -34,9 +34,6 @@ public class MyProfileActivity extends AppCompatActivity {
 
     private static final String TAG = "DEBUG - MyProfile";
 
-    private static final String ROLE_PATIENT = "10";
-    private static final String ROLE_THERAPIST = "01";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +60,6 @@ public class MyProfileActivity extends AppCompatActivity {
             JSONObject jwtObj = new JSONObject(claimsString);
 
             String jwtNRIC = jwtObj.getString("nric");
-            String jwtRole = jwtObj.getString("Roles");
 
             TextView nricText = findViewById(R.id.userNRICText);
             TextView roleText = findViewById(R.id.userRoleText);
@@ -71,13 +67,8 @@ public class MyProfileActivity extends AppCompatActivity {
             String nricStr = "NRIC: " + jwtNRIC;
             nricText.setText(nricStr);
 
-            if (jwtRole.equals(ROLE_PATIENT)) {
-                roleText.setText(R.string.role_patient_text);
-            } else if (jwtRole.equals(ROLE_THERAPIST)) {
-                roleText.setText(R.string.role_therapist_text);
-            } else {
-                roleText.setText(R.string.role_not_selected_text);
-            }
+            String roleStr = "Role: " + getIntent().getStringExtra("role");
+            roleText.setText(roleStr);
 
         } catch (Exception e) {
             Log.e(TAG, "An Exception occurred...", e);
