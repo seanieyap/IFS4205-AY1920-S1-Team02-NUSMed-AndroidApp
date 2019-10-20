@@ -68,12 +68,8 @@ public class RoleSelectActivity extends AppCompatActivity {
         role = intent.getStringExtra("role");
         Log.d(TAG, "onCreate() :: Roles: " + role);
 
-        if (role == null) {
-            RoleSelectTask roleSelectTask = new RoleSelectTask();
-            roleSelectTask.execute();
-        } else {
-            setButtons(role);
-        }
+        RoleSelectTask roleSelectTask = new RoleSelectTask();
+        roleSelectTask.execute();
     }
 
     private void setButtons(String role) {
