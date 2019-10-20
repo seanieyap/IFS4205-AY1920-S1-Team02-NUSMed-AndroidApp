@@ -39,6 +39,10 @@
     <string name="therapist_upload_record_text">Upload Record\n(for patient)</string>
     <string name="therapist_scan_nfc_text">Scan NFC\n(for emergency patient)</string>
     <string name="my_profile_text">My Profile</string>
+    <string name="role_text">Role</string>
+    <string name="role_patient_text">Role: Patient</string>
+    <string name="role_therapist_text">Role: Therapist</string>
+    <string name="role_not_selected_text">Role: Not Selected</string>
     <string name="switch_role_text">Switch Role</string>
     <string name="systolic_text">Systolic…</string>
     <string name="diastolic_text">Diastolic…</string>

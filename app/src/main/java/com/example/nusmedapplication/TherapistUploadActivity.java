@@ -1083,7 +1083,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     Toast.makeText(getApplicationContext(), "Record upload successful", Toast.LENGTH_SHORT).show();
                     finish();
                     break;
-                case 403:
+                case 401:
                     Log.d(TAG, "RecordUploadTask() :: Authentication FAILED! " +
                             "JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                     Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
