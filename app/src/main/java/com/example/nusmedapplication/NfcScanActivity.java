@@ -766,6 +766,7 @@ public class NfcScanActivity extends AppCompatActivity {
                     Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED due to server error!");
                     Toast.makeText(getBaseContext(), R.string.authentication_fail,
                             Toast.LENGTH_LONG).show();
+                    finish();
                     break;
             }
         }

@@ -969,6 +969,7 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
             String jsonCredentialsString = String.format(
                     "{'deviceID': '%s', 'jwt': '%s', 'title': '%s', 'description': '%s', 'type': '%s', 'content': '%s', 'fileName': '%s', 'fileExtension': '%s', 'fileSize': %d, 'fileContent': '%s'}",
                     deviceID, jwt, title, desc, type, content, fileName, fileExtension, fileSize, fileContent);
+            Log.e(TAG, jsonCredentialsString);
 
             OutputStream os = conn.getOutputStream();
             byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);

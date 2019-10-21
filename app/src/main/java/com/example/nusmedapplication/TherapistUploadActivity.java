@@ -66,6 +66,8 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
     private int fileSize = 0;
     private String fileContent = "";
 
+    private String patientPermissions = "";
+
     String[] recordTypes = {
             RecordType.HEIGHT_MEASUREMENT,
             RecordType.WEIGHT_MEASUREMENT,
@@ -725,6 +727,12 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                 fileButton.setVisibility(View.VISIBLE);
                 fileNameText.setVisibility(View.INVISIBLE);
             }
+        } else {
+            String patient = arg0.getItemAtPosition(position).toString();
+            String patientNRIC = patient.split(" ")[0];
+
+            GetPermissionsTask getPermissionsTask = new GetPermissionsTask();
+            getPermissionsTask.execute(patientNRIC);
         }
     }
 
@@ -988,6 +996,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
             String jsonCredentialsString = String.format(
                     "{'deviceID': '%s', 'jwt': '%s', 'patientNRIC': '%s', 'title': '%s', 'description': '%s', 'type': '%s', 'content': '%s', 'fileName': '%s', 'fileExtension': '%s', 'fileSize': %d, 'fileContent': '%s'}",
                     deviceID, jwt, patientNRIC, title, desc, type, content, fileName, fileExtension, fileSize, fileContent);
+            Log.e(TAG, jsonCredentialsString);
 
             OutputStream os = conn.getOutputStream();
             byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
@@ -1096,6 +1105,239 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     break;
                 default:
                     Toast.makeText(getApplicationContext(), "Record upload failed", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    }
+
+    private String getPermissionsBinary(int permissions) {
+        String permissionsBinary = "";
+
+        Gait gait = new Gait();
+        if (permissions >= gait.getPermissionFlag()) {
+            permissions -= gait.getPermissionFlag();
+            permissionsBinary += "1";
+        } else {
+            permissionsBinary += "0";
+        }
+
+        Xray xray = new Xray();
+        if (permissions >= xray.getPermissionFlag()) {
+            permissions -= xray.getPermissionFlag();
+            permissionsBinary += "1";
+        } else {
+            permissionsBinary += "0";
+        }
+
+        MRI mri = new MRI();
+        if (permissions >= mri.getPermissionFlag()) {
+            permissions -= mri.getPermissionFlag();
+            permissionsBinary += "1";
+        } else {
+            permissionsBinary += "0";
+        }
+
+        ECG ecg = new ECG();
+        if (permissions >= ecg.getPermissionFlag()) {
+            permissions -= ecg.getPermissionFlag();
+            permissionsBinary += "1";
+        } else {
+            permissionsBinary += "0";
+        }
+
+        BloodPressure bloodPressure = new BloodPressure();
+        if (permissions >= bloodPressure.getPermissionFlag()) {
+            permissions -= bloodPressure.getPermissionFlag();
+            permissionsBinary += "1";
+        } else {
+            permissionsBinary += "0";
+        }
+
+        Temperature temperature = new Temperature();
+        if (permissions >= temperature.getPermissionFlag()) {
+            permissions -= temperature.getPermissionFlag();
+            permissionsBinary += "1";
+        } else {
+            permissionsBinary += "0";
+        }
+
+        WeightMeasurement weightMeasurement = new WeightMeasurement();
+        if (permissions >= weightMeasurement.getPermissionFlag()) {
+            permissions -= weightMeasurement.getPermissionFlag();
+            permissionsBinary += "1";
+        } else {
+            permissionsBinary += "0";
+        }
+
+        HeightMeasurement heightMeasurement = new HeightMeasurement();
+        if (permissions >= heightMeasurement.getPermissionFlag()) {
+            permissions -= heightMeasurement.getPermissionFlag();
+            permissionsBinary += "1";
+        } else {
+            permissionsBinary += "0";
+        }
+
+        return permissionsBinary;
+    }
+
+    private void setAuthenticatedRecordTypes(String permissions) {
+        int count = 0;
+        for (int i = 0; i < permissions.length(); i++) {
+            if (permissions.charAt(i) == '1') {
+                count++;
+            }
+        }
+
+        int ptr = 0;
+        String[] newRecordTypes = new String[count];
+
+        if (permissions.charAt(7) == '1') {
+            newRecordTypes[ptr] = RecordType.HEIGHT_MEASUREMENT;
+            ptr++;
+        }
+        if (permissions.charAt(6) == '1') {
+            newRecordTypes[ptr] = RecordType.WEIGHT_MEASUREMENT;
+            ptr++;
+        }
+        if (permissions.charAt(5) == '1') {
+            newRecordTypes[ptr] = RecordType.TEMPERATURE;
+            ptr++;
+        }
+        if (permissions.charAt(4) == '1') {
+            newRecordTypes[ptr] = RecordType.BLOOD_PRESSURE;
+            ptr++;
+        }
+        if (permissions.charAt(3) == '1') {
+            newRecordTypes[ptr] = RecordType.ECG;
+            ptr++;
+        }
+        if (permissions.charAt(2) == '1') {
+            newRecordTypes[ptr] = RecordType.MRI;
+            ptr++;
+        }
+        if (permissions.charAt(1) == '1') {
+            newRecordTypes[ptr] = RecordType.X_RAY;
+            ptr++;
+        }
+        if (permissions.charAt(0) == '1') {
+            newRecordTypes[ptr] = RecordType.GAIT;
+        }
+
+        // Getting the instance of Spinner and applying OnItemSelectedListener on it
+        final Spinner recordTypeSpinner = (Spinner) findViewById(R.id.therapistRecordTypeSpinner);
+        recordTypeSpinner.setOnItemSelectedListener(this);
+
+        // Creating the ArrayAdapter instance having the bank name list
+        ArrayAdapter recordTypeAdapter = new ArrayAdapter(this,android.R.layout.simple_spinner_item, newRecordTypes);
+        recordTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Setting the ArrayAdapter data on the Spinner
+        recordTypeSpinner.setAdapter(recordTypeAdapter);
+    }
+
+    private int getPermissions(String patientNRIC) {
+
+        int responseCode = 409;
+
+        try {
+            String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+
+            SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
+                    "secret_shared_prefs",
+                    masterKeyAlias,
+                    getApplicationContext(),
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+
+            String deviceID = sharedPreferences.getString("deviceID", null);
+            String jwt = sharedPreferences.getString("jwt", null);
+
+            URL url = new URL("https://ifs4205team2-1.comp.nus.edu.sg/api/record/therapist/getPermissions");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; utf-8");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoOutput(true);
+
+            String jsonCredentialsString = String.format(
+                    "{'deviceID': '%s', 'jwt': '%s', 'patientNRIC': '%s'}",
+                    deviceID, jwt, patientNRIC);
+
+            OutputStream os = conn.getOutputStream();
+            byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
+            os.write(jsonCredentialsBytes, 0, jsonCredentialsBytes.length);
+
+            responseCode = conn.getResponseCode();
+            Log.d(TAG, "getPermissions() :: responseCode: " + Integer.toString(responseCode));
+
+            switch (responseCode) {
+                case 200:
+                    // Read JWT from response
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String currentLine;
+                    while ((currentLine = in.readLine()) != null) {
+                        response.append(currentLine);
+                    }
+                    in.close();
+
+                    String results = new String(Base64.decode(response.toString(), Base64.DEFAULT));
+                    Log.d(TAG, "getPermissions() :: permissions: " + results);
+
+                    patientPermissions = getPermissionsBinary(Integer.parseInt(results));
+                    Log.d(TAG, "getPermissions() :: permissionsBinary: " + patientPermissions);
+
+                    break;
+                case 401:
+                    break;
+                default:
+                    break;
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "An exception occurred...", e);
+        }
+        return responseCode;
+    }
+
+    private class GetPermissionsTask extends AsyncTask<String, Void, Integer> {
+
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(TherapistUploadActivity.this);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setMessage(getString(R.string.loading_text));
+            progressDialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(String... strings) {
+            return getPermissions(strings[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Integer responseCode) {
+            progressDialog.dismiss();
+
+            switch (responseCode) {
+                case 200:
+                    setAuthenticatedRecordTypes(patientPermissions);
+                    break;
+                case 401:
+                    Log.d(TAG, "GetPermissionsTask() :: Authentication FAILED! " +
+                            "JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                    Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
+                            Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
+                    startActivity(intent);
+                    break;
+                default:
+                    Toast.makeText(getApplicationContext(), "Failed to get patient permissions", Toast.LENGTH_SHORT).show();
                     break;
             }
         }
