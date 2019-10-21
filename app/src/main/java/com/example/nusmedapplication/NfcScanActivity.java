@@ -17,13 +17,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import org.json.JSONObject;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
+
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -103,6 +103,9 @@ public class NfcScanActivity extends AppCompatActivity {
             } else if ("webLogin".equals(scanNfcPurpose)) {
                 WebLoginTask webLoginTask = new WebLoginTask();
                 webLoginTask.execute();
+            } else if ("scanPatient".equals(scanNfcPurpose)) {
+                ScanPatientTask scanPatientTask = new ScanPatientTask();
+                scanPatientTask.execute();
             }
 
         } catch (IOException e) {
@@ -612,6 +615,157 @@ public class NfcScanActivity extends AppCompatActivity {
                     finish();
                     break;
                 default:
+                    break;
+            }
+        }
+    }
+
+    private int scanPatient() {
+        int responseCode = 500;
+
+        String deviceID = retrievedDeviceID;
+        String jwt = retrievedJwt;
+
+        String patientTokenID = uniqueIdString;
+
+        try {
+            URL url = new URL(
+                    "https://ifs4205team2-1.comp.nus.edu.sg/api/record/therapist/scanPatient");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; utf-8");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoOutput(true);
+
+            String jsonCredentialsString = String.format(
+                    "{'deviceID': '%s', 'jwt': '%s', 'tokenID': '%s'}",
+                    deviceID, jwt, patientTokenID);
+            Log.d(TAG, "scanPatient() :: jsonCredentialsString: " + jsonCredentialsString);
+
+            OutputStream os = conn.getOutputStream();
+            byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
+            os.write(jsonCredentialsBytes, 0, jsonCredentialsBytes.length);
+
+            responseCode = conn.getResponseCode();
+            Log.d(TAG, "scanPatient() :: responseCode: " + Integer.toString(responseCode));
+
+            switch (responseCode) {
+                case 200:
+                    // Read JWT from response
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String currentLine;
+                    while ((currentLine = in.readLine()) != null) {
+                        response.append(currentLine);
+                    }
+                    in.close();
+
+                    String newJwt = response.toString().replace("\"", "");;
+                    Log.d(TAG, "scanPatient() :: newJwt: " + newJwt);
+
+                    // Separate JWT into header, claims and signature
+                    String[] newJwtParts = newJwt.split("\\.");
+                    String claims = newJwtParts[0];
+                    String signature = newJwtParts[1];
+
+                    // Verify signature in JWT
+                    byte[] modulusBytes = Base64.decode(getString(R.string.m), Base64.DEFAULT);
+                    byte[] exponentBytes = Base64.decode(getString(R.string.e), Base64.DEFAULT);
+                    BigInteger modulus = new BigInteger(1, modulusBytes);
+                    BigInteger exponent = new BigInteger(1, exponentBytes);
+
+                    RSAPublicKeySpec rsaPubKey = new RSAPublicKeySpec(modulus, exponent);
+                    KeyFactory kf = KeyFactory.getInstance("RSA");
+                    PublicKey pubKey = kf.generatePublic(rsaPubKey);
+
+                    Signature signCheck = Signature.getInstance("SHA256withRSA");
+                    signCheck.initVerify(pubKey);
+                    signCheck.update(Base64.decode(claims, Base64.DEFAULT));
+                    boolean validSig = signCheck.verify(Base64.decode(signature, Base64.DEFAULT));
+
+                    if (validSig) {
+                        // Store JWT in EncryptedSharedPreferences
+                        String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+
+                        SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
+                                "secret_shared_prefs",
+                                masterKeyAlias,
+                                getApplicationContext(),
+                                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                        );
+
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("jwt", newJwt);
+                        editor.apply();
+                    }
+
+                    break;
+                case 401:
+                    break;
+                default:
+                    break;
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "An Exception occurred...", e);
+            // Deal with timeout/ no internet connection
+        }
+
+        return responseCode;
+    }
+
+    private class ScanPatientTask extends AsyncTask<String, Void, Integer> {
+
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(NfcScanActivity.this);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setMessage(getString(R.string.authenticating_text));
+            progressDialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(String... params) {
+            return scanPatient();
+        }
+
+        @Override
+        protected void onPostExecute(Integer responseCode) {
+            progressDialog.dismiss();
+            Intent intent;
+
+            switch (responseCode) {
+                case 200:
+                    Log.d(TAG, "ScanPatientTask() :: Scan Patient SUCCESS! Return to previous activity!");
+                    Toast.makeText(getBaseContext(), R.string.authentication_success,
+                            Toast.LENGTH_LONG).show();
+                    finish();
+                    break;
+                case 401:
+                    Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED! " +
+                            "deviceID/JWT might be invalid. Start AUTHENTICATE activity!");
+                    Toast.makeText(getBaseContext(), R.string.authentication_fail,
+                            Toast.LENGTH_LONG).show();
+                    intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
+                    startActivity(intent);
+                    break;
+                case 403:
+                    Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED! " +
+                            "Patient tokenID might be invalid. Return to previous activity!");
+                    Toast.makeText(getBaseContext(), R.string.authentication_fail,
+                            Toast.LENGTH_LONG).show();
+                    finish();
+                    break;
+                default:
+                    Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED due to server error!");
+                    Toast.makeText(getBaseContext(), R.string.authentication_fail,
+                            Toast.LENGTH_LONG).show();
                     break;
             }
         }

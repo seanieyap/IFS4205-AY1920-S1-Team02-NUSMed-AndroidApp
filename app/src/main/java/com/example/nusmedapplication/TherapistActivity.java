@@ -52,6 +52,14 @@ public class TherapistActivity extends AppCompatActivity {
                 updateJwtTask.execute();
             }
         });
+
+        Button scanPatientButton = findViewById(R.id.therapistScanNfcButton);
+        scanPatientButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                callNfcScan("scanPatient");
+            }
+        });
     }
 
     public void getTherapistUploadPage() {
@@ -76,7 +84,7 @@ public class TherapistActivity extends AppCompatActivity {
                 startActivity(profileIntent);
                 break;
             case R.id.action_therapist_web_login:
-                callNfcScan();
+                callNfcScan("webLogin");
                 break;
             case R.id.action_therapist_switch_role:
                 Intent roleIntent = new Intent(this, RoleSelectActivity.class);
@@ -92,9 +100,9 @@ public class TherapistActivity extends AppCompatActivity {
         // super.onBackPressed();
     }
 
-    private void callNfcScan() {
+    private void callNfcScan(String purpose) {
         Intent intent = new Intent(getApplicationContext(), NfcScanActivity.class);
-        intent.putExtra("scanNfcPurpose", "webLogin");
+        intent.putExtra("scanNfcPurpose", purpose);
         startActivity(intent);
     }
 
