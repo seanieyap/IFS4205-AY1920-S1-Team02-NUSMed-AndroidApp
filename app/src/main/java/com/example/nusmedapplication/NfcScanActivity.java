@@ -755,15 +755,9 @@ public class NfcScanActivity extends AppCompatActivity {
                     intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
                     startActivity(intent);
                     break;
-                case 403:
+                default:
                     Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED! " +
                             "Patient tokenID might be invalid. Return to previous activity!");
-                    Toast.makeText(getBaseContext(), R.string.authentication_fail,
-                            Toast.LENGTH_LONG).show();
-                    finish();
-                    break;
-                default:
-                    Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED due to server error!");
                     Toast.makeText(getBaseContext(), R.string.authentication_fail,
                             Toast.LENGTH_LONG).show();
                     finish();
