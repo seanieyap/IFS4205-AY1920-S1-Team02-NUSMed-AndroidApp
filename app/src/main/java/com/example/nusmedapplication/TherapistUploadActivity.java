@@ -993,9 +993,14 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     break;
             }
 
+            String encodedTitle = Base64.encodeToString(title.getBytes(), Base64.DEFAULT);
+            String encodedDesc = Base64.encodeToString(desc.getBytes(), Base64.DEFAULT);
+            String encodedFileName = Base64.encodeToString(fileName.getBytes(), Base64.DEFAULT);
+            String encodedFileExt = Base64.encodeToString(fileExtension.getBytes(), Base64.DEFAULT);
+
             String jsonCredentialsString = String.format(
                     "{'deviceID': '%s', 'jwt': '%s', 'patientNRIC': '%s', 'title': '%s', 'description': '%s', 'type': '%s', 'content': '%s', 'fileName': '%s', 'fileExtension': '%s', 'fileSize': %d, 'fileContent': '%s'}",
-                    deviceID, jwt, patientNRIC, title, desc, type, content, fileName, fileExtension, fileSize, fileContent);
+                    deviceID, jwt, patientNRIC, encodedTitle, encodedDesc, type, content, encodedFileName, encodedFileExt, fileSize, fileContent);
             Log.e(TAG, jsonCredentialsString);
 
             OutputStream os = conn.getOutputStream();
