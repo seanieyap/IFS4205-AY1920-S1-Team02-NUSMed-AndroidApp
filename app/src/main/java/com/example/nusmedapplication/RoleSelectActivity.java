@@ -381,8 +381,7 @@ public class RoleSelectActivity extends AppCompatActivity {
                 role = jwtRole;
                 setButtons(role);
             } else {
-                Log.d(TAG, "RoleSelectTask() :: Authentication FAILED! " +
-                        "JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                Log.d(TAG, "RoleSelectTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
@@ -519,8 +518,7 @@ public class RoleSelectActivity extends AppCompatActivity {
                     getTherapistPage();
                 }
             } else {
-                Log.d(TAG, "UpdateJwtRoleTask() :: Authentication FAILED! " +
-                        "JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                Log.d(TAG, "UpdateJwtRoleTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);

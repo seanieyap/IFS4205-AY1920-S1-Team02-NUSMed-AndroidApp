@@ -1071,8 +1071,7 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                     finish();
                     break;
                 case 401:
-                    Log.d(TAG, "RecordUploadTask() :: Authentication FAILED! " +
-                            "JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                    Log.d(TAG, "RecordUploadTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                     Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                             Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
