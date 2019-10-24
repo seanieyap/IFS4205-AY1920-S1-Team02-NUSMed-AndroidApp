@@ -754,6 +754,9 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
         }
 
         Spinner recordTypeSpinner = findViewById(R.id.therapistRecordTypeSpinner);
+        if (recordTypeSpinner.getSelectedItem() == null) {
+            return false;
+        }
         switch (recordTypeSpinner.getSelectedItem().toString()) {
             case RecordType.HEIGHT_MEASUREMENT:
                 EditText heightInput = findViewById(R.id.therapistUploadHeightField);
@@ -899,7 +902,14 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
             }
 
             Spinner typeSpinner = findViewById(R.id.therapistRecordTypeSpinner);
-            String type = typeSpinner.getSelectedItem().toString();
+            String type = "";
+            Object itemSelected = typeSpinner.getSelectedItem();
+            if (itemSelected == null) {
+                return responseCode;
+            } else {
+                type = itemSelected.toString();
+            }
+
             String content = "";
             String fileName = "";
             String fileExtension = "";
