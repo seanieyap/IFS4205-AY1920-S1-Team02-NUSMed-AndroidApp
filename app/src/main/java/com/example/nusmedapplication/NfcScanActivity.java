@@ -744,7 +744,8 @@ public class NfcScanActivity extends AppCompatActivity {
                     Log.d(TAG, "ScanPatientTask() :: Scan Patient SUCCESS! Return to previous activity!");
                     Toast.makeText(getBaseContext(), R.string.authentication_success,
                             Toast.LENGTH_LONG).show();
-                    finish();
+                    intent = new Intent(getApplicationContext(), TherapistActivity.class);
+                    startActivity(intent);
                     break;
                 case 401:
                     Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED! deviceID/JWT might be invalid. Start AUTHENTICATE activity!");
