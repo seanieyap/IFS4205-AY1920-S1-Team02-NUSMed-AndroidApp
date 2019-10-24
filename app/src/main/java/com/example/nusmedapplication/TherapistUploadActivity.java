@@ -881,6 +881,9 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
             // Get and check record information
             Spinner patientSpinner = findViewById(R.id.therapistPatientSpinner);
             String patient = patientSpinner.getSelectedItem().toString();
+            if (patient.equals("")) {
+                return responseCode;
+            }
             String patientNRIC = patient.substring(0, patient.indexOf(" "));
 
             EditText titleInput = findViewById(R.id.therapistRecordTitleField);
