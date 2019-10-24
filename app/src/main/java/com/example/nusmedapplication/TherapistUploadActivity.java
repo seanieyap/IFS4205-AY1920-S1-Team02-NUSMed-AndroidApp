@@ -186,7 +186,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                 intent.setType("*/*");
                 switch (recordTypeSpinner.getSelectedItem().toString()) {
                     case RecordType.ECG:
-                        intent.setType("text/plain");
+                        intent.setType("text/*");
                         break;
                     case RecordType.MRI:
                         intent.setType("image/*");
@@ -195,7 +195,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                         intent.setType("image/*");
                         break;
                     case RecordType.GAIT:
-                        String[] mimetypes = {"text/plain", "video/mp4"};
+                        String[] mimetypes = {"text/*", "video/mp4"};
                         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
                         break;
                 }
@@ -247,7 +247,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
         // check the file format
         String mimeType = getContentResolver().getType(uri);
         Log.i(TAG, "Format: " + mimeType);
-        if (!mimeType.equals("text/plain")) {
+        if (!(mimeType.equals("text/plain") || mimeType.equals("text/comma-separated-values"))) {
             Toast.makeText(getApplicationContext(), "File format invalid", Toast.LENGTH_SHORT).show();
         } else {
             // The query, since it only applies to a single document, will only return
@@ -469,7 +469,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
         // check the file format
         String mimeType = getContentResolver().getType(uri);
         Log.i(TAG, "Format: " + mimeType);
-        if (!(mimeType.equals("text/plain") || mimeType.equals("video/mp4"))) {
+        if (!(mimeType.equals("text/plain") || mimeType.equals("text/comma-separated-values") || mimeType.equals("video/mp4"))) {
             Toast.makeText(getApplicationContext(), "File format invalid", Toast.LENGTH_SHORT).show();
         } else {
             // The query, since it only applies to a single document, will only return
@@ -507,7 +507,8 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     Log.i(TAG, "Size: " + size);
 
                     // Check if the size exceeds the limit
-                    if ((mimeType.equals("text/plain") && Integer.parseInt(size) > FILE_SIZE_512KB) || (mimeType.equals("video/mp4") && Integer.parseInt(size) > FILE_SIZE_50MB)) {
+                    if (((mimeType.equals("text/plain") || mimeType.equals("text/comma-separated-values")) && Integer.parseInt(size) > FILE_SIZE_512KB)
+                            || (mimeType.equals("video/mp4") && Integer.parseInt(size) > FILE_SIZE_50MB)) {
                         Toast.makeText(getApplicationContext(), "File too large", Toast.LENGTH_SHORT).show();
                     } else {
                         // Display file name on the app to show ready to upload

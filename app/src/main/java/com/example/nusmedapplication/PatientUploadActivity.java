@@ -174,7 +174,7 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                 intent.setType("*/*");
                 switch (recordTypeSpinner.getSelectedItem().toString()) {
                     case RecordType.ECG:
-                        intent.setType("text/plain");
+                        intent.setType("text/*");
                         break;
                     case RecordType.MRI:
                         intent.setType("image/*");
@@ -183,7 +183,7 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                         intent.setType("image/*");
                         break;
                     case RecordType.GAIT:
-                        String[] mimetypes = {"text/plain", "video/mp4"};
+                        String[] mimetypes = {"text/*", "video/mp4"};
                         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
                         break;
                 }
@@ -235,7 +235,7 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
         // check the file format
         String mimeType = getContentResolver().getType(uri);
         Log.i(TAG, "Format: " + mimeType);
-        if (!mimeType.equals("text/plain")) {
+        if (!(mimeType.equals("text/plain") || mimeType.equals("text/comma-separated-values"))) {
             Toast.makeText(getApplicationContext(), "File format invalid", Toast.LENGTH_SHORT).show();
         } else {
             // The query, since it only applies to a single document, will only return
@@ -457,7 +457,7 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
         // check the file format
         String mimeType = getContentResolver().getType(uri);
         Log.i(TAG, "Format: " + mimeType);
-        if (!(mimeType.equals("text/plain") || mimeType.equals("video/mp4"))) {
+        if (!(mimeType.equals("text/plain") || mimeType.equals("text/comma-separated-values") || mimeType.equals("video/mp4"))) {
             Toast.makeText(getApplicationContext(), "File format invalid", Toast.LENGTH_SHORT).show();
         } else {
             // The query, since it only applies to a single document, will only return
@@ -495,7 +495,8 @@ public class PatientUploadActivity extends AppCompatActivity implements AdapterV
                     Log.i(TAG, "Size: " + size);
 
                     // Check if the size exceeds the limit
-                    if ((mimeType.equals("text/plain") && Integer.parseInt(size) > FILE_SIZE_512KB) || (mimeType.equals("video/mp4") && Integer.parseInt(size) > FILE_SIZE_50MB)) {
+                    if (((mimeType.equals("text/plain") || mimeType.equals("text/comma-separated-values")) && Integer.parseInt(size) > FILE_SIZE_512KB)
+                            || (mimeType.equals("video/mp4") && Integer.parseInt(size) > FILE_SIZE_50MB)) {
                         Toast.makeText(getApplicationContext(), "File too large", Toast.LENGTH_SHORT).show();
                     } else {
                         // Display file name on the app to show ready to upload
@@ -1294,7 +1295,7 @@ class ECG extends RecordType {
 
     @Override
     public String getConstraint() {
-        return "(Format: .txt. Max Size: 0.5MB)";
+        return "(Format: .txt, .csv. Max Size: 0.5MB)";
     }
 
     @Override
@@ -1308,7 +1309,8 @@ class ECG extends RecordType {
     }
 
     public static boolean isFileValid(String extension, int size) {
-        if (extension.equals(".txt") && size <= PatientUploadActivity.FILE_SIZE_512KB) {
+        if ((extension.equals(".txt") || extension.equals(".csv"))
+                && size <= PatientUploadActivity.FILE_SIZE_512KB) {
             return true;
         }
         return false;
@@ -1386,7 +1388,7 @@ class Gait extends RecordType {
 
     @Override
     public String getConstraint() {
-        return "(Formats: .txt, .mp4. Max Size: 0.5MB (for txt), 50MB (for mp4))";
+        return "(Formats: .txt, .csv, .mp4. Max Size: 0.5MB (for txt & csv), 50MB (for mp4))";
     }
 
     @Override
@@ -1400,7 +1402,7 @@ class Gait extends RecordType {
     }
 
     public static boolean isFileValid(String extension, int size) {
-        if ((extension.equals(".txt") && size <= PatientUploadActivity.FILE_SIZE_512KB)
+        if (((extension.equals(".txt") || extension.equals(".csv")) && size <= PatientUploadActivity.FILE_SIZE_512KB)
                 || (extension.equals(".mp4") && size <= PatientUploadActivity.FILE_SIZE_50MB)) {
             return true;
         }
