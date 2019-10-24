@@ -108,13 +108,17 @@ public class NfcScanActivity extends AppCompatActivity {
                 scanPatientTask.execute();
             }
 
-        } catch (IOException e) {
-            Log.e(TAG, "IOException while writing MifareUltralight...", e);
+        } catch (Exception e) {
+            Toast.makeText(getBaseContext(), "Invalid NFC Tag!", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Exception while reading MifareUltralight...", e);
+            finish();
         } finally {
             try {
                 nfcTag.close();
-            } catch (IOException e) {
-                Log.e(TAG, "IOException while closing MifareUltralight...", e);
+            } catch (Exception e) {
+                Toast.makeText(getBaseContext(), "Invalid NFC Tag!", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "Exception while closing MifareUltralight...", e);
+                finish();
             }
         }
     }
