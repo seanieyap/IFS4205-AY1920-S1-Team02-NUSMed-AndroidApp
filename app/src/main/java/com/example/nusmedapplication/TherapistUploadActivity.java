@@ -729,10 +729,12 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
             }
         } else {
             String patient = arg0.getItemAtPosition(position).toString();
-            String patientNRIC = patient.split(" ")[0];
+            if (!patient.equals("")) {
+                String patientNRIC = patient.split(" ")[0];
 
-            GetPermissionsTask getPermissionsTask = new GetPermissionsTask();
-            getPermissionsTask.execute(patientNRIC);
+                GetPermissionsTask getPermissionsTask = new GetPermissionsTask();
+                getPermissionsTask.execute(patientNRIC);
+            }
         }
     }
 
