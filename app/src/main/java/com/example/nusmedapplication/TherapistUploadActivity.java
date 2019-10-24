@@ -1100,8 +1100,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     finish();
                     break;
                 case 401:
-                    Log.d(TAG, "RecordUploadTask() :: Authentication FAILED! " +
-                            "JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                    Log.d(TAG, "RecordUploadTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                     Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                             Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
@@ -1336,8 +1335,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     setAuthenticatedRecordTypes(patientPermissions);
                     break;
                 case 401:
-                    Log.d(TAG, "GetPermissionsTask() :: Authentication FAILED! " +
-                            "JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                    Log.d(TAG, "GetPermissionsTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                     Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                             Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);

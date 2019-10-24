@@ -48,8 +48,7 @@ public class MainActivity extends AppCompatActivity {
             AuthenticateJwtTask authenticateJwtTask = new AuthenticateJwtTask();
             authenticateJwtTask.execute();
         } else {
-            Log.d(TAG, "onCreate() :: No stored JWT! Application data might have been wiped or " +
-                    "application was just installed. Start AUTHENTICATE activity!");
+            Log.d(TAG, "onCreate() :: No stored JWT! Application data might have been wiped or application was just installed. Start AUTHENTICATE activity!");
             Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
             startActivity(intent);
         }
@@ -206,15 +205,13 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean authenticated) {
             if (authenticated) {
                 progressDialog.dismiss();
-                Log.d(TAG, "AuthenticateJwtTask() :: Authentication SUCCESS! " +
-                        "Start RoleSelect activity!");
+                Log.d(TAG, "AuthenticateJwtTask() :: Authentication SUCCESS! Start RoleSelect activity!");
                 Intent intent = new Intent(getApplicationContext(), RoleSelectActivity.class);
                 intent.putExtra("role", jwtRole);
                 startActivity(intent);
             } else {
                 progressDialog.dismiss();
-                Log.d(TAG, "AuthenticateJwtTask() :: Authentication FAILED! " +
-                        "JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                Log.d(TAG, "AuthenticateJwtTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);

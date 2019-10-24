@@ -314,9 +314,7 @@ public class NfcScanActivity extends AppCompatActivity {
                 authenticateTask.execute();
             } else {
                 progressDialog.dismiss();
-                Log.d(TAG, "RegisterTask() :: Registration FAILED! " +
-                        "nric/password/deviceId/tokenId may be invalid. " +
-                        "Start AUTHENTICATE activity!");
+                Log.d(TAG, "RegisterTask() :: Registration FAILED! nric/password/deviceId/tokenId may be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.authentication_fail,
                         Toast.LENGTH_LONG).show();
                 finish();
@@ -448,8 +446,7 @@ public class NfcScanActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean authenticated) {
             if (authenticated) {
                 progressDialog.dismiss();
-                Log.d(TAG, "AuthenticateTask() :: Authentication SUCCESS! " +
-                        "Start RoleSelect activity!");
+                Log.d(TAG, "AuthenticateTask() :: Authentication SUCCESS! Start RoleSelect activity!");
                 Toast.makeText(getBaseContext(), R.string.authentication_success,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), RoleSelectActivity.class);
@@ -457,8 +454,7 @@ public class NfcScanActivity extends AppCompatActivity {
                 startActivity(intent);
             } else {
                 progressDialog.dismiss();
-                Log.d(TAG, "AuthenticateTask() :: Authentication FAILED! " +
-                        "nric/password/deviceID might be invalid. Start AUTHENTICATE activity!");
+                Log.d(TAG, "AuthenticateTask() :: Authentication FAILED! nric/password/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.authentication_fail,
                         Toast.LENGTH_LONG).show();
                 finish();
@@ -601,8 +597,7 @@ public class NfcScanActivity extends AppCompatActivity {
                     finish();
                     break;
                 case 401:
-                    Log.d(TAG, "WebLoginTask() :: Web Login FAILED! " +
-                            "deviceID/tokenID/JWT might be invalid. Start AUTHENTICATE activity!");
+                    Log.d(TAG, "WebLoginTask() :: Web Login FAILED! deviceID/tokenID/JWT might be invalid. Start AUTHENTICATE activity!");
                     Toast.makeText(getBaseContext(), R.string.authentication_fail,
                             Toast.LENGTH_LONG).show();
                     intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
@@ -748,16 +743,14 @@ public class NfcScanActivity extends AppCompatActivity {
                     finish();
                     break;
                 case 401:
-                    Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED! " +
-                            "deviceID/JWT might be invalid. Start AUTHENTICATE activity!");
+                    Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED! deviceID/JWT might be invalid. Start AUTHENTICATE activity!");
                     Toast.makeText(getBaseContext(), R.string.authentication_fail,
                             Toast.LENGTH_LONG).show();
                     intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
                     startActivity(intent);
                     break;
                 default:
-                    Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED! " +
-                            "Patient tokenID might be invalid. Return to previous activity!");
+                    Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED! Patient tokenID might be invalid. Return to previous activity!");
                     Toast.makeText(getBaseContext(), R.string.authentication_fail,
                             Toast.LENGTH_LONG).show();
                     finish();

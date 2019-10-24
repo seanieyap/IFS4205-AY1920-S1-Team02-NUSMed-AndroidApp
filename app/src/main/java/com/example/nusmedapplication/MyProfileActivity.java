@@ -200,8 +200,7 @@ public class MyProfileActivity extends AppCompatActivity {
             progressDialog.dismiss();
 
             if (responseCode != 200) {
-                Log.d(TAG, "UpdateJwtTask() :: Authentication FAILED! " +
-                        "JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                Log.d(TAG, "UpdateJwtTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
