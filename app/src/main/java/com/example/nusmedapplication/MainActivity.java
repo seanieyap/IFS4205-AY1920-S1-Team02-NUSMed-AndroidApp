@@ -91,79 +91,29 @@ public class MainActivity extends AppCompatActivity {
             URL url = new
                     URL("https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+            String encodedDeviceID = Base64.encodeToString(
+                    deviceID.getBytes(StandardCharsets.UTF_8), Base64.URL_SAFE);
+
             conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json; utf-8");
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setDoOutput(true);
-
-            String jsonCredentialsString = String.format(
-                    "{'nric': %s, 'password': %s, 'deviceID': '%s', 'jwt': '%s'}",
-                    null, null, deviceID, jwt);
-            Log.d(TAG, "authenticateJwt() :: jsonCredentialsString: " + jsonCredentialsString);
-
-            OutputStream os = conn.getOutputStream();
-            byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
-            os.write(jsonCredentialsBytes, 0, jsonCredentialsBytes.length);
+            conn.setRequestProperty("Authorization", "Bearer " + jwt + ":" + encodedDeviceID);
+            Log.d(TAG, "authenticateJwt() :: Authorization: Bearer " + jwt + ":" + encodedDeviceID);
+            conn.connect();
 
             int responseCode = conn.getResponseCode();
             Log.d(TAG, "authenticateJwt() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
-                    // Read JWT from response
-                    BufferedReader in = new BufferedReader(
-                            new InputStreamReader(conn.getInputStream()));
-                    StringBuilder response = new StringBuilder();
-                    String currentLine;
-                    while ((currentLine = in.readLine()) != null) {
-                        response.append(currentLine);
-                    }
-                    in.close();
-
-                    String newJwt = response.toString().replace("\"", "");;
-                    Log.d(TAG, "authenticateJwt() :: newJwt: " + newJwt);
-
-                    // Separate JWT into header, claims and signature
-                    String[] newJwtParts = newJwt.split("\\.");
-                    String claims = newJwtParts[0];
-                    String signature = newJwtParts[1];
-
-                    // Verify signature in JWT
-                    byte[] modulusBytes = Base64.decode(getString(R.string.m), Base64.DEFAULT);
-                    byte[] exponentBytes = Base64.decode(getString(R.string.e), Base64.DEFAULT);
-                    BigInteger modulus = new BigInteger(1, modulusBytes);
-                    BigInteger exponent = new BigInteger(1, exponentBytes);
-
-                    RSAPublicKeySpec rsaPubKey = new RSAPublicKeySpec(modulus, exponent);
-                    KeyFactory kf = KeyFactory.getInstance("RSA");
-                    PublicKey pubKey = kf.generatePublic(rsaPubKey);
-
-                    Signature signCheck = Signature.getInstance("SHA256withRSA");
-                    signCheck.initVerify(pubKey);
-                    signCheck.update(Base64.decode(claims, Base64.DEFAULT));
-                    authenticated = signCheck.verify(Base64.decode(signature, Base64.DEFAULT));
+                    authenticated = UtilityFunctions.validateResponseAuth(getApplicationContext(),
+                            conn.getHeaderField("Authorization"));
 
                     if (authenticated) {
-                        // Store JWT in EncryptedSharedPreferences
-                        String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+                        String newJwt = UtilityFunctions.getJwtFromHeader(
+                                conn.getHeaderField("Authorization"));
+                        UtilityFunctions.storeJwtToPref(getApplicationContext(), newJwt);
 
-                        SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
-                                "secret_shared_prefs",
-                                masterKeyAlias,
-                                getApplicationContext(),
-                                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                        );
-
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString("jwt", newJwt);
-                        editor.apply();
-
-                        // Get roles from JWT
-                        byte[] claimsBytes = Base64.decode(claims, Base64.DEFAULT);
-                        String claimsString = new String(claimsBytes, "UTF-8");
-                        JSONObject jwtObj = new JSONObject(claimsString);
-                        jwtRole = jwtObj.getString("Roles");
+                        jwtRole = UtilityFunctions.getRolesFromJwt(newJwt);
                         Log.d(TAG, "authenticate() :: Roles: " + jwtRole);
                     }
 

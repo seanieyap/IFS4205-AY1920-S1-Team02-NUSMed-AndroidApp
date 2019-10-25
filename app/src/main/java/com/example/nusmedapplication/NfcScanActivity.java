@@ -94,7 +94,7 @@ public class NfcScanActivity extends AppCompatActivity {
 
             // Read from page 6 of the NFC tag as the tag's unique ID is stored there
             byte[] uniqueIdBytes = nfcTag.readPages(6);
-            uniqueIdString = Base64.encodeToString(uniqueIdBytes, Base64.DEFAULT).trim();
+            uniqueIdString = Base64.encodeToString(uniqueIdBytes, Base64.URL_SAFE).trim();
             Log.d(TAG, "onNewIntent() :: Scanned Tag ID: " + uniqueIdString);
 
             if ("registerDevice".equals(scanNfcPurpose)) {
@@ -249,6 +249,7 @@ public class NfcScanActivity extends AppCompatActivity {
             String jsonCredentialsString = String.format(
                     "{'nric': '%s', 'password': '%s', 'deviceID': '%s', 'tokenID': '%s'}",
                     nric, password, deviceID, tokenID);
+            Log.d(TAG, "register() :: jsonCredentialsString: " + jsonCredentialsString);
 
             OutputStream os = conn.getOutputStream();
             byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
