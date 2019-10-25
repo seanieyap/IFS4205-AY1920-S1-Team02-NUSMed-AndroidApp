@@ -186,7 +186,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                 intent.setType("*/*");
                 switch (recordTypeSpinner.getSelectedItem().toString()) {
                     case RecordType.ECG:
-                        intent.setType("text/plain");
+                        intent.setType("text/*");
                         break;
                     case RecordType.MRI:
                         intent.setType("image/*");
@@ -195,7 +195,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                         intent.setType("image/*");
                         break;
                     case RecordType.GAIT:
-                        String[] mimetypes = {"text/plain", "video/mp4"};
+                        String[] mimetypes = {"text/*", "video/mp4"};
                         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
                         break;
                 }
@@ -247,7 +247,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
         // check the file format
         String mimeType = getContentResolver().getType(uri);
         Log.i(TAG, "Format: " + mimeType);
-        if (!mimeType.equals("text/plain")) {
+        if (!(mimeType.equals("text/plain") || mimeType.equals("text/comma-separated-values"))) {
             Toast.makeText(getApplicationContext(), "File format invalid", Toast.LENGTH_SHORT).show();
         } else {
             // The query, since it only applies to a single document, will only return
@@ -469,7 +469,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
         // check the file format
         String mimeType = getContentResolver().getType(uri);
         Log.i(TAG, "Format: " + mimeType);
-        if (!(mimeType.equals("text/plain") || mimeType.equals("video/mp4"))) {
+        if (!(mimeType.equals("text/plain") || mimeType.equals("text/comma-separated-values") || mimeType.equals("video/mp4"))) {
             Toast.makeText(getApplicationContext(), "File format invalid", Toast.LENGTH_SHORT).show();
         } else {
             // The query, since it only applies to a single document, will only return
@@ -507,7 +507,8 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     Log.i(TAG, "Size: " + size);
 
                     // Check if the size exceeds the limit
-                    if ((mimeType.equals("text/plain") && Integer.parseInt(size) > FILE_SIZE_512KB) || (mimeType.equals("video/mp4") && Integer.parseInt(size) > FILE_SIZE_50MB)) {
+                    if (((mimeType.equals("text/plain") || mimeType.equals("text/comma-separated-values")) && Integer.parseInt(size) > FILE_SIZE_512KB)
+                            || (mimeType.equals("video/mp4") && Integer.parseInt(size) > FILE_SIZE_50MB)) {
                         Toast.makeText(getApplicationContext(), "File too large", Toast.LENGTH_SHORT).show();
                     } else {
                         // Display file name on the app to show ready to upload
@@ -754,6 +755,9 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
         }
 
         Spinner recordTypeSpinner = findViewById(R.id.therapistRecordTypeSpinner);
+        if (recordTypeSpinner.getSelectedItem() == null) {
+            return false;
+        }
         switch (recordTypeSpinner.getSelectedItem().toString()) {
             case RecordType.HEIGHT_MEASUREMENT:
                 EditText heightInput = findViewById(R.id.therapistUploadHeightField);
@@ -899,8 +903,16 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
             }
 
             Spinner typeSpinner = findViewById(R.id.therapistRecordTypeSpinner);
-            String type = typeSpinner.getSelectedItem().toString();
+            String type = "";
+            Object itemSelected = typeSpinner.getSelectedItem();
+            if (itemSelected == null) {
+                return responseCode;
+            } else {
+                type = itemSelected.toString();
+            }
+
             String content = "";
+            String fileFullName = "";
             String fileName = "";
             String fileExtension = "";
 
@@ -942,13 +954,14 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     break;
                 case RecordType.ECG:
                     TextView ecgNameText = findViewById(R.id.therapistFileNameText);
-                    fileName = ecgNameText.getText().toString();
+                    fileFullName = ecgNameText.getText().toString();
 
-                    if (ecgNameText.getVisibility() == View.INVISIBLE || fileName.isEmpty()) {
+                    if (ecgNameText.getVisibility() == View.INVISIBLE || fileFullName.isEmpty()) {
                         return responseCode;
                     }
 
-                    fileExtension = fileName.substring(fileName.lastIndexOf("."));
+                    fileName = fileFullName.substring(0, fileFullName.lastIndexOf("."));
+                    fileExtension = fileFullName.substring(fileFullName.lastIndexOf("."));
 
                     if (!ECG.isFileValid(fileExtension, fileSize)) {
                         return responseCode;
@@ -956,13 +969,14 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     break;
                 case RecordType.MRI:
                     TextView mriNameText = findViewById(R.id.therapistFileNameText);
-                    fileName = mriNameText.getText().toString();
+                    fileFullName = mriNameText.getText().toString();
 
-                    if (mriNameText.getVisibility() == View.INVISIBLE || fileName.isEmpty()) {
+                    if (mriNameText.getVisibility() == View.INVISIBLE || fileFullName.isEmpty()) {
                         return responseCode;
                     }
 
-                    fileExtension = fileName.substring(fileName.lastIndexOf("."));
+                    fileName = fileFullName.substring(0, fileFullName.lastIndexOf("."));
+                    fileExtension = fileFullName.substring(fileFullName.lastIndexOf("."));
 
                     if (!MRI.isFileValid(fileExtension, fileSize)) {
                         return responseCode;
@@ -970,13 +984,14 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     break;
                 case RecordType.X_RAY:
                     TextView xrayNameText = findViewById(R.id.therapistFileNameText);
-                    fileName = xrayNameText.getText().toString();
+                    fileFullName = xrayNameText.getText().toString();
 
-                    if (xrayNameText.getVisibility() == View.INVISIBLE || fileName.isEmpty()) {
+                    if (xrayNameText.getVisibility() == View.INVISIBLE || fileFullName.isEmpty()) {
                         return responseCode;
                     }
 
-                    fileExtension = fileName.substring(fileName.lastIndexOf("."));
+                    fileName = fileFullName.substring(0, fileFullName.lastIndexOf("."));
+                    fileExtension = fileFullName.substring(fileFullName.lastIndexOf("."));
 
                     if (!Xray.isFileValid(fileExtension, fileSize)) {
                         return responseCode;
@@ -984,13 +999,14 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     break;
                 case RecordType.GAIT:
                     TextView gaitNameText = findViewById(R.id.therapistFileNameText);
-                    fileName = gaitNameText.getText().toString();
+                    fileFullName = gaitNameText.getText().toString();
 
-                    if (gaitNameText.getVisibility() == View.INVISIBLE || fileName.isEmpty()) {
+                    if (gaitNameText.getVisibility() == View.INVISIBLE || fileFullName.isEmpty()) {
                         return responseCode;
                     }
 
-                    fileExtension = fileName.substring(fileName.lastIndexOf("."));
+                    fileName = fileFullName.substring(0, fileFullName.lastIndexOf("."));
+                    fileExtension = fileFullName.substring(fileFullName.lastIndexOf("."));
 
                     if (!Gait.isFileValid(fileExtension, fileSize)) {
                         return responseCode;
