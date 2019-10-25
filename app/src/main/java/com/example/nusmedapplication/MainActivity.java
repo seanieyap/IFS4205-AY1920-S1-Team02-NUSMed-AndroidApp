@@ -9,23 +9,14 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.json.JSONObject;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
@@ -92,12 +83,14 @@ public class MainActivity extends AppCompatActivity {
                     URL("https://ifs4205team2-1.comp.nus.edu.sg/api/account/authenticate");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-            String encodedDeviceID = Base64.encodeToString(
-                    deviceID.getBytes(StandardCharsets.UTF_8), Base64.URL_SAFE);
+            String credentialsString = jwt + ":" + deviceID;
+            Log.d(TAG, "authenticateJwt() :: credentialsString: " + credentialsString);
+            String encodedCredentialsString = Base64.encodeToString(
+                    credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
-            conn.setRequestProperty("Authorization", "Bearer " + jwt + ":" + encodedDeviceID);
-            Log.d(TAG, "authenticateJwt() :: Authorization: Bearer " + jwt + ":" + encodedDeviceID);
+            conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
+            Log.d(TAG, "authenticateJwt() :: Authorization: Bearer " + encodedCredentialsString);
             conn.connect();
 
             int responseCode = conn.getResponseCode();

@@ -1019,58 +1019,34 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
             String encodedFileName = Base64.encodeToString(fileName.getBytes(), Base64.DEFAULT);
             String encodedFileExt = Base64.encodeToString(fileExtension.getBytes(), Base64.DEFAULT);
 
-            String jsonCredentialsString = String.format(
-                    "{'deviceID': '%s', 'jwt': '%s', 'patientNRIC': '%s', 'title': '%s', 'description': '%s', 'type': '%s', 'content': '%s', 'fileName': '%s', 'fileExtension': '%s', 'fileSize': %d, 'fileContent': '%s'}",
-                    deviceID, jwt, patientNRIC, encodedTitle, encodedDesc, type, content, encodedFileName, encodedFileExt, fileSize, fileContent);
-            Log.e(TAG, jsonCredentialsString);
+            String credentialsString = jwt + ":" + deviceID;
+            Log.d(TAG, "uploadRecord() :: credentialsString: " + credentialsString);
+            String encodedCredentialsString = Base64.encodeToString(
+                    credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
+            conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
+            Log.d(TAG, "uploadRecord() :: Authorization: Bearer " + encodedCredentialsString);
+
+            String contentsString = String.format(
+                    "{'patientNRIC': '%s', 'title': '%s', 'description': '%s', 'type': '%s', 'content': '%s', 'fileName': '%s', 'fileExtension': '%s', 'fileSize': %d, 'fileContent': '%s'}",
+                    patientNRIC, encodedTitle, encodedDesc, type, content, encodedFileName, encodedFileExt, fileSize, fileContent);
+            Log.e(TAG, contentsString);
 
             OutputStream os = conn.getOutputStream();
-            byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
-            os.write(jsonCredentialsBytes, 0, jsonCredentialsBytes.length);
+            byte[] contentsBytes = contentsString.getBytes(StandardCharsets.UTF_8);
+            os.write(contentsBytes, 0, contentsBytes.length);
 
             responseCode = conn.getResponseCode();
             Log.d(TAG, "uploadRecord() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
-                    // Read JWT from response
-                    BufferedReader in = new BufferedReader(
-                            new InputStreamReader(conn.getInputStream()));
-                    StringBuilder response = new StringBuilder();
-                    String currentLine;
-                    while ((currentLine = in.readLine()) != null) {
-                        response.append(currentLine);
-                    }
-                    in.close();
-
-                    String newJwt = response.toString().replace("\"", "");;
-                    Log.d(TAG, "uploadRecord() :: newJwt: " + newJwt);
-
-                    // Separate JWT into header, claims and signature
-                    String[] newJwtParts = newJwt.split("\\.");
-                    String claims = newJwtParts[0];
-                    String signature = newJwtParts[1];
-
-                    // Verify signature in JWT
-                    byte[] modulusBytes = Base64.decode(getString(R.string.m), Base64.DEFAULT);
-                    byte[] exponentBytes = Base64.decode(getString(R.string.e), Base64.DEFAULT);
-                    BigInteger modulus = new BigInteger(1, modulusBytes);
-                    BigInteger exponent = new BigInteger(1, exponentBytes);
-
-                    RSAPublicKeySpec rsaPubKey = new RSAPublicKeySpec(modulus, exponent);
-                    KeyFactory kf = KeyFactory.getInstance("RSA");
-                    PublicKey pubKey = kf.generatePublic(rsaPubKey);
-
-                    Signature signCheck = Signature.getInstance("SHA256withRSA");
-                    signCheck.initVerify(pubKey);
-                    signCheck.update(Base64.decode(claims, Base64.DEFAULT));
-                    boolean validSig = signCheck.verify(Base64.decode(signature, Base64.DEFAULT));
+                    boolean validSig = UtilityFunctions.validateResponseAuth(getApplicationContext(),
+                            conn.getHeaderField("Authorization"));
 
                     if (validSig) {
-                        // Store JWT in EncryptedSharedPreferences
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString("jwt", newJwt);
-                        editor.apply();
+                        String newJwt = UtilityFunctions.getJwtFromHeader(
+                                conn.getHeaderField("Authorization"));
+                        UtilityFunctions.storeJwtToPref(getApplicationContext(), newJwt);
                     }
 
                     break;
@@ -1279,25 +1255,23 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
 
             URL url = new URL("https://ifs4205team2-1.comp.nus.edu.sg/api/record/therapist/getPermissions");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+            String credentialsString = jwt + ":" + deviceID + ":" + patientNRIC;
+            Log.d(TAG, "getPermissions() :: credentialsString: " + credentialsString);
+            String encodedCredentialsString = Base64.encodeToString(
+                    credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
+
             conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json; utf-8");
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setDoOutput(true);
-
-            String jsonCredentialsString = String.format(
-                    "{'deviceID': '%s', 'jwt': '%s', 'patientNRIC': '%s'}",
-                    deviceID, jwt, patientNRIC);
-
-            OutputStream os = conn.getOutputStream();
-            byte[] jsonCredentialsBytes = jsonCredentialsString.getBytes(StandardCharsets.UTF_8);
-            os.write(jsonCredentialsBytes, 0, jsonCredentialsBytes.length);
+            conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
+            Log.d(TAG, "getPermissions() :: Authorization: Bearer " + encodedCredentialsString);
+            conn.connect();
 
             responseCode = conn.getResponseCode();
             Log.d(TAG, "getPermissions() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
-                    // Read JWT from response
+                    // Read response
                     BufferedReader in = new BufferedReader(
                             new InputStreamReader(conn.getInputStream()));
                     StringBuilder response = new StringBuilder();
