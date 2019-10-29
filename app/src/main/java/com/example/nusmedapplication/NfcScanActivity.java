@@ -23,20 +23,11 @@ import androidx.core.content.ContextCompat;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.spec.RSAPublicKeySpec;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.NFC;
@@ -95,7 +86,7 @@ public class NfcScanActivity extends AppCompatActivity {
             // Read from page 6 of the NFC tag as the tag's unique ID is stored there
             byte[] uniqueIdBytes = nfcTag.readPages(6);
             uniqueIdString = Base64.encodeToString(uniqueIdBytes, Base64.NO_WRAP).trim();
-            Log.d(TAG, "onNewIntent() :: Scanned Tag ID: " + uniqueIdString);
+            //Log.d(TAG, "onNewIntent() :: Scanned Tag ID: " + uniqueIdString);
 
             if ("registerDevice".equals(scanNfcPurpose)) {
                 RegisterTask registerTask = new RegisterTask();
@@ -110,14 +101,14 @@ public class NfcScanActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             Toast.makeText(getBaseContext(), "Invalid NFC Tag!", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "Exception while reading MifareUltralight...", e);
+            //Log.e(TAG, "Exception while reading MifareUltralight...", e);
             finish();
         } finally {
             try {
                 nfcTag.close();
             } catch (Exception e) {
                 Toast.makeText(getBaseContext(), "Invalid NFC Tag!", Toast.LENGTH_LONG).show();
-                Log.e(TAG, "Exception while closing MifareUltralight...", e);
+                //Log.e(TAG, "Exception while closing MifareUltralight...", e);
                 finish();
             }
         }
@@ -137,18 +128,27 @@ public class NfcScanActivity extends AppCompatActivity {
         // super.onBackPressed();
     }
 
+    /**
+     * Checks and requests for necessary permissions.
+     */
     private void ensurePermissions() {
         if (!checkPermissions()) {
             requestPermissions();
         }
     }
 
+    /**
+     * Checks for necessary permissions.
+     */
     private boolean checkPermissions() {
         int result = ContextCompat.checkSelfPermission(getApplicationContext(), NFC);
         result ^= ContextCompat.checkSelfPermission(getApplicationContext(), CAMERA);
         return result == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Requests for necessary permissions.
+     */
     private void requestPermissions() {
         // Runtime permissions only work API 23 onwards
         ActivityCompat.requestPermissions(this, new String[]{CAMERA, NFC},
@@ -173,6 +173,9 @@ public class NfcScanActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Checks if device supports NFC and is enabled.
+     */
     private void checkNfc() {
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
@@ -196,6 +199,10 @@ public class NfcScanActivity extends AppCompatActivity {
         nfcPendingIntent = PendingIntent.getActivity(this, 0, nfcIntent, 0);
     }
 
+    /**
+     * Retrieves the stored data in the encrypted shared preferences
+     * or from data passed through the previous activity.
+     */
     private void retrieveStoredData() {
         try {
             String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
@@ -210,26 +217,29 @@ public class NfcScanActivity extends AppCompatActivity {
 
             retrievedDeviceID = sharedPreferences.getString("deviceID", null);
             retrievedJwt = sharedPreferences.getString("jwt", null);
-            Log.d(TAG, "retrieveStoredData() :: retrievedDeviceID: " + retrievedDeviceID);
-            Log.d(TAG, "retrieveStoredData() :: retrievedJwt: " + retrievedJwt);
+            //Log.d(TAG, "retrieveStoredData() :: retrievedDeviceID: " + retrievedDeviceID);
+            //Log.d(TAG, "retrieveStoredData() :: retrievedJwt: " + retrievedJwt);
 
             Intent intent = getIntent();
             scanNfcPurpose = intent.getStringExtra("scanNfcPurpose");
-            Log.d(TAG, "retrieveStoredData() :: scanNfcPurpose: " + scanNfcPurpose);
+            //Log.d(TAG, "retrieveStoredData() :: scanNfcPurpose: " + scanNfcPurpose);
 
             if ("registerDevice".equals(scanNfcPurpose)) {
                 retrievedNric = intent.getStringExtra("nric");
                 retrievedPass = intent.getStringExtra("password");
             }
 
-            Log.d(TAG, "retrieveStoredData() :: retrievedNric: " + retrievedNric);
-            Log.d(TAG, "retrieveStoredData() :: retrievedPass: " + retrievedPass);
+            //Log.d(TAG, "retrieveStoredData() :: retrievedNric: " + retrievedNric);
+            //Log.d(TAG, "retrieveStoredData() :: retrievedPass: " + retrievedPass);
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
         }
     }
 
+    /**
+     * Registers the user's deviceID, tokenID with the web server.
+     */
     private boolean register() {
         boolean success = false;
         String deviceID = retrievedDeviceID;
@@ -243,17 +253,17 @@ public class NfcScanActivity extends AppCompatActivity {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             String credentialsString = nric + ":" + password + ":" + deviceID + ":" + tokenID;
-            Log.d(TAG, "register() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "register() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Basic " + encodedCredentialsString);
-            Log.d(TAG, "register() :: Authorization: Basic " + encodedCredentialsString);
+            //Log.d(TAG, "register() :: Authorization: Basic " + encodedCredentialsString);
             conn.connect();
 
             int responseCode = conn.getResponseCode();
-            Log.d(TAG, "register() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "register() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -269,25 +279,28 @@ public class NfcScanActivity extends AppCompatActivity {
                     in.close();
 
                     String responseString = response.toString();
-                    Log.d(TAG, "register() :: responseString: " + responseString);
+                    //Log.d(TAG, "register() :: responseString: " + responseString);
 
                     break;
                 case 401:
                     break;
                 case 500:
-                    Log.e(TAG, "An error has occured!");
+                    //Log.e(TAG, "An error has occured!");
                 default:
                     break;
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
             // Deal with timeout/ no internet connection
         }
 
         return success;
     }
 
+    /**
+     * AsyncTask to register the user's deviceID, tokenID.
+     */
     private class RegisterTask extends AsyncTask<String, Void, Boolean> {
 
         ProgressDialog progressDialog;
@@ -311,12 +324,12 @@ public class NfcScanActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean authenticated) {
             if (authenticated) {
                 progressDialog.dismiss();
-                Log.d(TAG, "RegisterTask() :: Registration SUCCESS! Start AuthenticateTask!");
+                //Log.d(TAG, "RegisterTask() :: Registration SUCCESS! Start AuthenticateTask!");
                 AuthenticateTask authenticateTask = new AuthenticateTask();
                 authenticateTask.execute();
             } else {
                 progressDialog.dismiss();
-                Log.d(TAG, "RegisterTask() :: Registration FAILED! nric/password/deviceId/tokenId may be invalid. Start AUTHENTICATE activity!");
+                //Log.d(TAG, "RegisterTask() :: Registration FAILED! nric/password/deviceId/tokenId may be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.authentication_fail,
                         Toast.LENGTH_LONG).show();
                 finish();
@@ -324,6 +337,10 @@ public class NfcScanActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Authenticates the user's nric, password, deviceID with the web server
+     * and retrieve the returned JWT.
+     */
     private boolean authenticate() {
         boolean authenticated = false;
         String deviceID = retrievedDeviceID;
@@ -336,17 +353,17 @@ public class NfcScanActivity extends AppCompatActivity {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             String credentialsString = nric + ":" + password + ":" + deviceID;
-            Log.d(TAG, "authenticate() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "authenticate() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Basic " + encodedCredentialsString);
-            Log.d(TAG, "authenticate() :: Authorization: Basic " + encodedCredentialsString);
+            //Log.d(TAG, "authenticate() :: Authorization: Basic " + encodedCredentialsString);
             conn.connect();
 
             int responseCode = conn.getResponseCode();
-            Log.d(TAG, "authenticate() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "authenticate() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -359,7 +376,7 @@ public class NfcScanActivity extends AppCompatActivity {
                         UtilityFunctions.storeJwtToPref(getApplicationContext(), newJwt);
 
                         jwtRole = UtilityFunctions.getRolesFromJwt(newJwt);
-                        Log.d(TAG, "authenticate() :: Roles: " + jwtRole);
+                        //Log.d(TAG, "authenticate() :: Roles: " + jwtRole);
                     }
 
                     break;
@@ -370,13 +387,16 @@ public class NfcScanActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
             // Deal with timeout/ no internet connection
         }
 
         return authenticated;
     }
 
+    /**
+     * AsyncTask to authenticate the user's nric, password, deviceID.
+     */
     private class AuthenticateTask extends AsyncTask<String, Void, Boolean> {
 
         ProgressDialog progressDialog;
@@ -400,7 +420,7 @@ public class NfcScanActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean authenticated) {
             if (authenticated) {
                 progressDialog.dismiss();
-                Log.d(TAG, "AuthenticateTask() :: Authentication SUCCESS! Start RoleSelect activity!");
+                //Log.d(TAG, "AuthenticateTask() :: Authentication SUCCESS! Start RoleSelect activity!");
                 Toast.makeText(getBaseContext(), R.string.authentication_success,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), RoleSelectActivity.class);
@@ -408,7 +428,7 @@ public class NfcScanActivity extends AppCompatActivity {
                 startActivity(intent);
             } else {
                 progressDialog.dismiss();
-                Log.d(TAG, "AuthenticateTask() :: Authentication FAILED! nric/password/deviceID might be invalid. Start AUTHENTICATE activity!");
+                //Log.d(TAG, "AuthenticateTask() :: Authentication FAILED! nric/password/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.authentication_fail,
                         Toast.LENGTH_LONG).show();
                 finish();
@@ -416,6 +436,10 @@ public class NfcScanActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Authenticates the user's jwt, deviceID, tokenID with the web server for web login
+     * and retrieve the returned JWT.
+     */
     private int weblogin() {
         int responseCode = 500;
         String deviceID = retrievedDeviceID;
@@ -428,17 +452,17 @@ public class NfcScanActivity extends AppCompatActivity {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             String credentialsString = jwt + ":" + deviceID + ":" + tokenID;
-            Log.d(TAG, "weblogin() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "weblogin() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
-            Log.d(TAG, "weblogin() :: Authorization: Bearer " + encodedCredentialsString);
+            //Log.d(TAG, "weblogin() :: Authorization: Bearer " + encodedCredentialsString);
             conn.connect();
 
             responseCode = conn.getResponseCode();
-            Log.d(TAG, "weblogin() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "weblogin() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -451,7 +475,7 @@ public class NfcScanActivity extends AppCompatActivity {
                         UtilityFunctions.storeJwtToPref(getApplicationContext(), newJwt);
 
                         jwtRole = UtilityFunctions.getRolesFromJwt(newJwt);
-                        Log.d(TAG, "webLogin() :: Roles: " + jwtRole);
+                        //Log.d(TAG, "webLogin() :: Roles: " + jwtRole);
                     }
 
                     break;
@@ -464,13 +488,16 @@ public class NfcScanActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
             // Deal with timeout/ no internet connection
         }
 
         return responseCode;
     }
 
+    /**
+     * AsyncTask to authenticate the user's jwt, deviceID, tokenID for web login.
+     */
     private class WebLoginTask extends AsyncTask<String, Void, Integer> {
 
         ProgressDialog progressDialog;
@@ -497,20 +524,20 @@ public class NfcScanActivity extends AppCompatActivity {
 
             switch (responseCode) {
                 case 200:
-                    Log.d(TAG, "WebLoginTask() :: Web Login SUCCESS! Return to previous activity!");
+                    //Log.d(TAG, "WebLoginTask() :: Web Login SUCCESS! Return to previous activity!");
                     Toast.makeText(getBaseContext(), R.string.authentication_success,
                             Toast.LENGTH_LONG).show();
                     finish();
                     break;
                 case 401:
-                    Log.d(TAG, "WebLoginTask() :: Web Login FAILED! deviceID/tokenID/JWT might be invalid. Start AUTHENTICATE activity!");
+                    //Log.d(TAG, "WebLoginTask() :: Web Login FAILED! deviceID/tokenID/JWT might be invalid. Start AUTHENTICATE activity!");
                     Toast.makeText(getBaseContext(), R.string.authentication_fail,
                             Toast.LENGTH_LONG).show();
                     intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
                     startActivity(intent);
                     break;
                 case 400:
-                    Log.d(TAG, "WebLoginTask() :: The web app did not trigger an MFA login!");
+                    //Log.d(TAG, "WebLoginTask() :: The web app did not trigger an MFA login!");
                     Toast.makeText(getBaseContext(), R.string.weblogin_fail,
                             Toast.LENGTH_LONG).show();
                     finish();
@@ -521,6 +548,10 @@ public class NfcScanActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles scanned emergency patient's tokenID with web server
+     * and retrieve the returned JWT.
+     */
     private int scanPatient() {
         int responseCode = 500;
 
@@ -535,17 +566,17 @@ public class NfcScanActivity extends AppCompatActivity {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             String credentialsString = jwt + ":" + deviceID + ":" + patientTokenID;
-            Log.d(TAG, "scanPatient() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "scanPatient() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
-            Log.d(TAG, "scanPatient() :: Authorization: Bearer " + encodedCredentialsString);
+            //Log.d(TAG, "scanPatient() :: Authorization: Bearer " + encodedCredentialsString);
             conn.connect();
 
             responseCode = conn.getResponseCode();
-            Log.d(TAG, "scanPatient() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "scanPatient() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -558,7 +589,7 @@ public class NfcScanActivity extends AppCompatActivity {
                         UtilityFunctions.storeJwtToPref(getApplicationContext(), newJwt);
 
                         jwtRole = UtilityFunctions.getRolesFromJwt(newJwt);
-                        Log.d(TAG, "scanPatient() :: Roles: " + jwtRole);
+                        //Log.d(TAG, "scanPatient() :: Roles: " + jwtRole);
                     }
 
                     break;
@@ -569,13 +600,16 @@ public class NfcScanActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
             // Deal with timeout/ no internet connection
         }
 
         return responseCode;
     }
 
+    /**
+     * AsyncTask to handle scanned emergency patient's tokenID.
+     */
     private class ScanPatientTask extends AsyncTask<String, Void, Integer> {
 
         ProgressDialog progressDialog;
@@ -602,21 +636,21 @@ public class NfcScanActivity extends AppCompatActivity {
 
             switch (responseCode) {
                 case 200:
-                    Log.d(TAG, "ScanPatientTask() :: Scan Patient SUCCESS! Return to previous activity!");
+                    //Log.d(TAG, "ScanPatientTask() :: Scan Patient SUCCESS! Return to previous activity!");
                     Toast.makeText(getBaseContext(), R.string.authentication_success,
                             Toast.LENGTH_LONG).show();
                     intent = new Intent(getApplicationContext(), TherapistActivity.class);
                     startActivity(intent);
                     break;
                 case 401:
-                    Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED! deviceID/JWT might be invalid. Start AUTHENTICATE activity!");
+                    //Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED! deviceID/JWT might be invalid. Start AUTHENTICATE activity!");
                     Toast.makeText(getBaseContext(), R.string.authentication_fail,
                             Toast.LENGTH_LONG).show();
                     intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
                     startActivity(intent);
                     break;
                 default:
-                    Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED! Patient tokenID might be invalid. Return to previous activity!");
+                    //Log.d(TAG, "ScanPatientTask() :: Scan Patient FAILED! Patient tokenID might be invalid. Return to previous activity!");
                     Toast.makeText(getBaseContext(), R.string.authentication_fail,
                             Toast.LENGTH_LONG).show();
                     finish();

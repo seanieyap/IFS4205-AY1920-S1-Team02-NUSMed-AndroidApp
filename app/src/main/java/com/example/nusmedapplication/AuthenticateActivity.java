@@ -99,18 +99,27 @@ public class AuthenticateActivity extends AppCompatActivity {
         // super.onBackPressed();
     }
 
+    /**
+     * Checks and requests for necessary permissions.
+     */
     private void ensurePermissions() {
         if (!checkPermissions()) {
             requestPermissions();
         }
     }
 
+    /**
+     * Checks for necessary permissions.
+     */
     private boolean checkPermissions() {
         int result = ContextCompat.checkSelfPermission(getApplicationContext(), NFC);
         result ^= ContextCompat.checkSelfPermission(getApplicationContext(), CAMERA);
         return result == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Requests for necessary permissions.
+     */
     private void requestPermissions() {
         // Runtime permissions only work API 23 onwards
         ActivityCompat.requestPermissions(this, new String[]{CAMERA, NFC},
@@ -135,6 +144,9 @@ public class AuthenticateActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Checks if device supports NFC and is enabled.
+     */
     private void checkNfc() {
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
@@ -154,6 +166,9 @@ public class AuthenticateActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Passes user input to NfcScanActivity after validation.
+     */
     private void callNfcScan() {
         EditText nricInput = findViewById(R.id.nricField);
         EditText passwordInput = findViewById(R.id.passwordField);
@@ -169,6 +184,9 @@ public class AuthenticateActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Validates user input.
+     */
     private boolean validateInput() {
         boolean valid = false;
 

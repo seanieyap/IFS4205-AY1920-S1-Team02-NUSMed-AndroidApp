@@ -35,16 +35,19 @@ public class MainActivity extends AppCompatActivity {
         retrieveStoredData();
 
         if (retrievedJwt != null) {
-            Log.d(TAG, "onCreate() :: retrievedJwt: " + retrievedJwt);
+            //Log.d(TAG, "onCreate() :: retrievedJwt: " + retrievedJwt);
             AuthenticateJwtTask authenticateJwtTask = new AuthenticateJwtTask();
             authenticateJwtTask.execute();
         } else {
-            Log.d(TAG, "onCreate() :: No stored JWT! Application data might have been wiped or application was just installed. Start AUTHENTICATE activity!");
+            //Log.d(TAG, "onCreate() :: No stored JWT! Application data might have been wiped or application was just installed. Start AUTHENTICATE activity!");
             Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
             startActivity(intent);
         }
     }
 
+    /**
+     * Retrieves the stored data in the encrypted shared preferences.
+     */
     private void retrieveStoredData() {
         try {
             String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
@@ -69,10 +72,13 @@ public class MainActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
         }
     }
 
+    /**
+     * Validates the retrieved JWT with the web server.
+     */
     private boolean authenticateJwt() {
         boolean authenticated = false;
         String deviceID = retrievedDeviceID;
@@ -84,17 +90,17 @@ public class MainActivity extends AppCompatActivity {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             String credentialsString = jwt + ":" + deviceID;
-            Log.d(TAG, "authenticateJwt() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "authenticateJwt() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
-            Log.d(TAG, "authenticateJwt() :: Authorization: Bearer " + encodedCredentialsString);
+            //Log.d(TAG, "authenticateJwt() :: Authorization: Bearer " + encodedCredentialsString);
             conn.connect();
 
             int responseCode = conn.getResponseCode();
-            Log.d(TAG, "authenticateJwt() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "authenticateJwt() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -107,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                         UtilityFunctions.storeJwtToPref(getApplicationContext(), newJwt);
 
                         jwtRole = UtilityFunctions.getRolesFromJwt(newJwt);
-                        Log.d(TAG, "authenticate() :: Roles: " + jwtRole);
+                        //Log.d(TAG, "authenticate() :: Roles: " + jwtRole);
                     }
 
                     break;
@@ -118,13 +124,16 @@ public class MainActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
             // Deal with timeout/ no internet connection
         }
 
         return authenticated;
     }
 
+    /**
+     * AsyncTask to validate the retrieved JWT.
+     */
     private class AuthenticateJwtTask extends AsyncTask<String, Void, Boolean> {
 
         ProgressDialog progressDialog;
@@ -148,13 +157,13 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean authenticated) {
             if (authenticated) {
                 progressDialog.dismiss();
-                Log.d(TAG, "AuthenticateJwtTask() :: Authentication SUCCESS! Start RoleSelect activity!");
+                //Log.d(TAG, "AuthenticateJwtTask() :: Authentication SUCCESS! Start RoleSelect activity!");
                 Intent intent = new Intent(getApplicationContext(), RoleSelectActivity.class);
                 intent.putExtra("role", jwtRole);
                 startActivity(intent);
             } else {
                 progressDialog.dismiss();
-                Log.d(TAG, "AuthenticateJwtTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                //Log.d(TAG, "AuthenticateJwtTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);

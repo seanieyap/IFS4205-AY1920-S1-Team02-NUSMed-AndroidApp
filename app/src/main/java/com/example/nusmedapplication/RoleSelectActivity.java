@@ -27,19 +27,9 @@ import androidx.core.content.ContextCompat;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.spec.RSAPublicKeySpec;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.NFC;
@@ -66,12 +56,15 @@ public class RoleSelectActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         role = intent.getStringExtra("role");
-        Log.d(TAG, "onCreate() :: Roles: " + role);
+        //Log.d(TAG, "onCreate() :: Roles: " + role);
 
         RoleSelectTask roleSelectTask = new RoleSelectTask();
         roleSelectTask.execute();
     }
 
+    /**
+     * Sets patient or therapist buttons depending on the user's available roles.
+     */
     private void setButtons(String role) {
         Button patientButton = findViewById(R.id.rolePatientButton);
         Button therapistButton = findViewById(R.id.roleTherapistButton);
@@ -195,18 +188,27 @@ public class RoleSelectActivity extends AppCompatActivity {
         // super.onBackPressed();
     }
 
+    /**
+     * Checks and requests for necessary permissions.
+     */
     private void ensurePermissions() {
         if (!checkPermissions()) {
             requestPermissions();
         }
     }
 
+    /**
+     * Checks for necessary permissions.
+     */
     private boolean checkPermissions() {
         int result = ContextCompat.checkSelfPermission(getApplicationContext(), NFC);
         result ^= ContextCompat.checkSelfPermission(getApplicationContext(), CAMERA);
         return result == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Requests for necessary permissions.
+     */
     private void requestPermissions() {
         // Runtime permissions only work API 23 onwards
         ActivityCompat.requestPermissions(this, new String[]{CAMERA, NFC},
@@ -231,6 +233,9 @@ public class RoleSelectActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Checks if device supports NFC and is enabled.
+     */
     private void checkNfc() {
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
@@ -250,12 +255,18 @@ public class RoleSelectActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Calls NfcScanActivity for the purpose of web login.
+     */
     private void callNfcScan() {
         Intent intent = new Intent(getApplicationContext(), NfcScanActivity.class);
         intent.putExtra("scanNfcPurpose", "webLogin");
         startActivity(intent);
     }
 
+    /**
+     * Retrieves all available roles of the user from the web server.
+     */
     private String roleSelect() {
         String jwtRole = null;
 
@@ -278,17 +289,17 @@ public class RoleSelectActivity extends AppCompatActivity {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             String credentialsString = jwt + ":" + deviceID;
-            Log.d(TAG, "roleSelect() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "roleSelect() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
-            Log.d(TAG, "roleSelect() :: Authorization: Bearer " + encodedCredentialsString);
+            //Log.d(TAG, "roleSelect() :: Authorization: Bearer " + encodedCredentialsString);
             conn.connect();
 
             int responseCode = conn.getResponseCode();
-            Log.d(TAG, "roleSelect() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "roleSelect() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -301,7 +312,7 @@ public class RoleSelectActivity extends AppCompatActivity {
                         UtilityFunctions.storeJwtToPref(getApplicationContext(), newJwt);
 
                         jwtRole = UtilityFunctions.getRolesFromJwt(newJwt);
-                        Log.d(TAG, "roleSelect() :: Roles: " + jwtRole);
+                        //Log.d(TAG, "roleSelect() :: Roles: " + jwtRole);
                     }
 
                     break;
@@ -312,13 +323,16 @@ public class RoleSelectActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
             // Deal with timeout/ no internet connection
         }
 
         return jwtRole;
     }
 
+    /**
+     * AsyncTask to retrieve all available roles of the user.
+     */
     private class RoleSelectTask extends AsyncTask<String, Void, String> {
 
         ProgressDialog progressDialog;
@@ -345,7 +359,7 @@ public class RoleSelectActivity extends AppCompatActivity {
                 role = jwtRole;
                 setButtons(role);
             } else {
-                Log.d(TAG, "RoleSelectTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                //Log.d(TAG, "RoleSelectTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
@@ -354,6 +368,9 @@ public class RoleSelectActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Retrieves updated JWT with the updated user roles from the web server.
+     */
     private String updateJwtRole(String newJwtRole) {
         String jwtRole = null;
 
@@ -376,17 +393,17 @@ public class RoleSelectActivity extends AppCompatActivity {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             String credentialsString = jwt + ":" + deviceID + ":" + newJwtRole;
-            Log.d(TAG, "updateJwtRole() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "updateJwtRole() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
-            Log.d(TAG, "updateJwtRole() :: Authorization: Bearer " + encodedCredentialsString);
+            //Log.d(TAG, "updateJwtRole() :: Authorization: Bearer " + encodedCredentialsString);
             conn.connect();
 
             int responseCode = conn.getResponseCode();
-            Log.d(TAG, "updateJwtRole() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "updateJwtRole() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -399,7 +416,7 @@ public class RoleSelectActivity extends AppCompatActivity {
                         UtilityFunctions.storeJwtToPref(getApplicationContext(), newJwt);
 
                         jwtRole = UtilityFunctions.getRolesFromJwt(newJwt);
-                        Log.d(TAG, "updateJwtRole() :: Roles: " + jwtRole);
+                        //Log.d(TAG, "updateJwtRole() :: Roles: " + jwtRole);
                     }
 
                     break;
@@ -410,13 +427,16 @@ public class RoleSelectActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
             // Deal with timeout/ no internet connection
         }
 
         return jwtRole;
     }
 
+    /**
+     * AsyncTask to retrieve updated JWT with the updated user roles.
+     */
     private class UpdateJwtRoleTask extends AsyncTask<String, Void, String> {
 
         ProgressDialog progressDialog;
@@ -446,7 +466,7 @@ public class RoleSelectActivity extends AppCompatActivity {
                     getTherapistPage();
                 }
             } else {
-                Log.d(TAG, "UpdateJwtRoleTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                //Log.d(TAG, "UpdateJwtRoleTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);

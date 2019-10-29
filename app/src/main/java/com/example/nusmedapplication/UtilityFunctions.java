@@ -22,11 +22,14 @@ import java.security.spec.RSAPublicKeySpec;
 public class UtilityFunctions {
     private static final String TAG = "DEBUG - UtilityFunction";
 
+    /**
+     * Validates the digital signature of the JWT.
+     */
     public static boolean validateResponseAuth(Context ctx, String authHeader) throws Exception {
         boolean authenticated = false;
 
         String newJwt = authHeader.substring(7);
-        Log.d(TAG, "validateResponseAuth() :: newJwt: " + newJwt);
+        //Log.d(TAG, "validateResponseAuth() :: newJwt: " + newJwt);
 
         // Separate JWT into header, claims and signature
         String[] newJwtParts = newJwt.split("\\.");
@@ -51,15 +54,20 @@ public class UtilityFunctions {
         return authenticated;
     }
 
+    /**
+     * Retrieves the JWT from the authentication header field.
+     */
     public static String getJwtFromHeader(String authHeader) {
         String newJwt = authHeader.substring(7);
-        Log.d(TAG, "getJwt() :: newJwt: " + newJwt);
+        //Log.d(TAG, "getJwt() :: newJwt: " + newJwt);
 
         return newJwt;
     }
 
+    /**
+     * Stores the JWT in the encrypted shared preferences.
+     */
     public static void storeJwtToPref(Context ctx, String newJwt) throws Exception {
-        // Store JWT in EncryptedSharedPreferences
         String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
 
         SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
@@ -75,6 +83,9 @@ public class UtilityFunctions {
         editor.apply();
     }
 
+    /**
+     * Retrieves the user's roles from the JWT.
+     */
     public static String getRolesFromJwt(String newJwt) throws Exception {
         // Separate JWT into header, claims and signature
         String[] newJwtParts = newJwt.split("\\.");
@@ -88,6 +99,9 @@ public class UtilityFunctions {
         return jwtObj.getString("Roles");
     }
 
+    /**
+     * Updates the JWT to prevent expiry.
+     */
     public static int updateJwt(Context ctx) {
         int responseCode = 500;
 
@@ -110,17 +124,17 @@ public class UtilityFunctions {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             String credentialsString = jwt + ":" + deviceID;
-            Log.d(TAG, "updateJwt() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "updateJwt() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
-            Log.d(TAG, "updateJwt() :: Authorization: Bearer " + encodedCredentialsString);
+            //Log.d(TAG, "updateJwt() :: Authorization: Bearer " + encodedCredentialsString);
             conn.connect();
 
             responseCode = conn.getResponseCode();
-            Log.d(TAG, "updateJwt() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "updateJwt() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -141,7 +155,7 @@ public class UtilityFunctions {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
             // Deal with timeout/ no internet connection
         }
 

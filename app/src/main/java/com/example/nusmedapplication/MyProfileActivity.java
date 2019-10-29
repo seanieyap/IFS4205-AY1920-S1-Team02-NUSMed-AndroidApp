@@ -71,7 +71,7 @@ public class MyProfileActivity extends AppCompatActivity {
             roleText.setText(roleStr);
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
         }
 
         Button returnButton = findViewById(R.id.myProfileReturnButton);
@@ -106,7 +106,7 @@ public class MyProfileActivity extends AppCompatActivity {
             progressDialog.dismiss();
 
             if (responseCode != 200) {
-                Log.d(TAG, "UpdateJwtTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                //Log.d(TAG, "UpdateJwtTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);

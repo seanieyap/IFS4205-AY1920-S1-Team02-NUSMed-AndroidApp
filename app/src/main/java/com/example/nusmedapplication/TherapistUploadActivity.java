@@ -220,7 +220,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
             Uri uri = null;
             if (resultData != null) {
                 uri = resultData.getData();
-                Log.i(TAG, "Uri: " + uri.toString());
+                //Log.i(TAG, "Uri: " + uri.toString());
 
                 Spinner recordTypeSpinner = (Spinner) findViewById(R.id.therapistRecordTypeSpinner);
                 switch (recordTypeSpinner.getSelectedItem().toString()) {
@@ -246,7 +246,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
         // Get the file's MIME type from the URI, then
         // check the file format
         String mimeType = getContentResolver().getType(uri);
-        Log.i(TAG, "Format: " + mimeType);
+        //Log.i(TAG, "Format: " + mimeType);
         if (!(mimeType.equals("text/plain") || mimeType.equals("text/comma-separated-values"))) {
             Toast.makeText(getApplicationContext(), "File format invalid", Toast.LENGTH_SHORT).show();
         } else {
@@ -265,7 +265,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     // provider-specific, and might not necessarily be the file name.
                     String displayName = cursor.getString(
                             cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                    Log.i(TAG, "Display Name: " + displayName);
+                    //Log.i(TAG, "Display Name: " + displayName);
 
                     int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
                     // If the size is unknown, the value stored is null.  But since an
@@ -282,7 +282,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     } else {
                         size = "Unknown";
                     }
-                    Log.i(TAG, "Size: " + size);
+                    //Log.i(TAG, "Size: " + size);
 
                     // Check if the size exceeds the limit
                     if (Integer.parseInt(size) > FILE_SIZE_512KB) {
@@ -303,11 +303,11 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                         inputStream.close();
 
                         fileContent = Base64.encodeToString(bytes, Base64.DEFAULT);
-                        Log.i(TAG, "Content: " + fileContent);
+                        //Log.i(TAG, "Content: " + fileContent);
                     }
                 }
             } catch (Exception e) {
-                Log.e(TAG, "An exception occurred...", e);
+                //Log.e(TAG, "An exception occurred...", e);
             } finally {
                 assert cursor != null;
                 cursor.close();
@@ -320,7 +320,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
         // Get the file's MIME type from the URI, then
         // check the file format
         String mimeType = getContentResolver().getType(uri);
-        Log.i(TAG, "Format: " + mimeType);
+        //Log.i(TAG, "Format: " + mimeType);
         if (!(mimeType.equals("image/jpeg") || mimeType.equals("image/jpg") || mimeType.equals("image/png"))) {
             Toast.makeText(getApplicationContext(), "File format invalid", Toast.LENGTH_SHORT).show();
         } else {
@@ -339,7 +339,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     // provider-specific, and might not necessarily be the file name.
                     String displayName = cursor.getString(
                             cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                    Log.i(TAG, "Display Name: " + displayName);
+                    //Log.i(TAG, "Display Name: " + displayName);
 
                     int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
                     // If the size is unknown, the value stored is null.  But since an
@@ -356,7 +356,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     } else {
                         size = "Unknown";
                     }
-                    Log.i(TAG, "Size: " + size);
+                    //Log.i(TAG, "Size: " + size);
 
                     // Check if the size exceeds the limit
                     if (Integer.parseInt(size) > FILE_SIZE_5MB) {
@@ -377,11 +377,11 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                         inputStream.close();
 
                         fileContent = Base64.encodeToString(bytes, Base64.DEFAULT);
-                        Log.i(TAG, "Content: " + fileContent);
+                        //Log.i(TAG, "Content: " + fileContent);
                     }
                 }
             } catch (Exception e) {
-                Log.e(TAG, "An exception occurred...", e);
+                //Log.e(TAG, "An exception occurred...", e);
             } finally {
                 assert cursor != null;
                 cursor.close();
@@ -394,7 +394,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
         // Get the file's MIME type from the URI, then
         // check the file format
         String mimeType = getContentResolver().getType(uri);
-        Log.i(TAG, "Format: " + mimeType);
+        //Log.i(TAG, "Format: " + mimeType);
         if (!(mimeType.equals("image/jpeg") || mimeType.equals("image/jpg") || mimeType.equals("image/png"))) {
             Toast.makeText(getApplicationContext(), "File format invalid", Toast.LENGTH_SHORT).show();
         } else {
@@ -413,7 +413,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     // provider-specific, and might not necessarily be the file name.
                     String displayName = cursor.getString(
                             cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                    Log.i(TAG, "Display Name: " + displayName);
+                    //Log.i(TAG, "Display Name: " + displayName);
 
                     int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
                     // If the size is unknown, the value stored is null.  But since an
@@ -430,7 +430,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     } else {
                         size = "Unknown";
                     }
-                    Log.i(TAG, "Size: " + size);
+                    //Log.i(TAG, "Size: " + size);
 
                     // Check if the size exceeds the limit
                     if (Integer.parseInt(size) > FILE_SIZE_5MB) {
@@ -451,11 +451,11 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                         inputStream.close();
 
                         fileContent = Base64.encodeToString(bytes, Base64.DEFAULT);
-                        Log.i(TAG, "Content: " + fileContent);
+                        //Log.i(TAG, "Content: " + fileContent);
                     }
                 }
             } catch (Exception e) {
-                Log.e(TAG, "An exception occurred...", e);
+                //Log.e(TAG, "An exception occurred...", e);
             } finally {
                 assert cursor != null;
                 cursor.close();
@@ -468,7 +468,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
         // Get the file's MIME type from the URI, then
         // check the file format
         String mimeType = getContentResolver().getType(uri);
-        Log.i(TAG, "Format: " + mimeType);
+        //Log.i(TAG, "Format: " + mimeType);
         if (!(mimeType.equals("text/plain") || mimeType.equals("text/comma-separated-values") || mimeType.equals("video/mp4"))) {
             Toast.makeText(getApplicationContext(), "File format invalid", Toast.LENGTH_SHORT).show();
         } else {
@@ -487,7 +487,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     // provider-specific, and might not necessarily be the file name.
                     String displayName = cursor.getString(
                             cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                    Log.i(TAG, "Display Name: " + displayName);
+                    //Log.i(TAG, "Display Name: " + displayName);
 
                     int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
                     // If the size is unknown, the value stored is null.  But since an
@@ -504,7 +504,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     } else {
                         size = "Unknown";
                     }
-                    Log.i(TAG, "Size: " + size);
+                    //Log.i(TAG, "Size: " + size);
 
                     // Check if the size exceeds the limit
                     if (((mimeType.equals("text/plain") || mimeType.equals("text/comma-separated-values")) && Integer.parseInt(size) > FILE_SIZE_512KB)
@@ -526,11 +526,11 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                         inputStream.close();
 
                         fileContent = Base64.encodeToString(bytes, Base64.DEFAULT);
-                        Log.i(TAG, "Content: " + fileContent);
+                        //Log.i(TAG, "Content: " + fileContent);
                     }
                 }
             } catch (Exception e) {
-                Log.e(TAG, "An exception occurred...", e);
+                //Log.e(TAG, "An exception occurred...", e);
             } finally {
                 assert cursor != null;
                 cursor.close();
@@ -1020,23 +1020,23 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
             String encodedFileExt = Base64.encodeToString(fileExtension.getBytes(), Base64.DEFAULT);
 
             String credentialsString = jwt + ":" + deviceID;
-            Log.d(TAG, "uploadRecord() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "uploadRecord() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
             conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
-            Log.d(TAG, "uploadRecord() :: Authorization: Bearer " + encodedCredentialsString);
+            //Log.d(TAG, "uploadRecord() :: Authorization: Bearer " + encodedCredentialsString);
 
             String contentsString = String.format(
                     "{'patientNRIC': '%s', 'title': '%s', 'description': '%s', 'type': '%s', 'content': '%s', 'fileName': '%s', 'fileExtension': '%s', 'fileSize': %d, 'fileContent': '%s'}",
                     patientNRIC, encodedTitle, encodedDesc, type, content, encodedFileName, encodedFileExt, fileSize, fileContent);
-            Log.e(TAG, contentsString);
+            //Log.e(TAG, contentsString);
 
             OutputStream os = conn.getOutputStream();
             byte[] contentsBytes = contentsString.getBytes(StandardCharsets.UTF_8);
             os.write(contentsBytes, 0, contentsBytes.length);
 
             responseCode = conn.getResponseCode();
-            Log.d(TAG, "uploadRecord() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "uploadRecord() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -1061,7 +1061,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An exception occurred...", e);
+            //Log.e(TAG, "An exception occurred...", e);
         }
         return responseCode;
     }
@@ -1095,7 +1095,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     finish();
                     break;
                 case 401:
-                    Log.d(TAG, "RecordUploadTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                    //Log.d(TAG, "RecordUploadTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                     Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                             Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
@@ -1257,17 +1257,17 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             String credentialsString = jwt + ":" + deviceID + ":" + patientNRIC;
-            Log.d(TAG, "getPermissions() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "getPermissions() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
-            Log.d(TAG, "getPermissions() :: Authorization: Bearer " + encodedCredentialsString);
+            //Log.d(TAG, "getPermissions() :: Authorization: Bearer " + encodedCredentialsString);
             conn.connect();
 
             responseCode = conn.getResponseCode();
-            Log.d(TAG, "getPermissions() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "getPermissions() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -1282,10 +1282,10 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     in.close();
 
                     String results = new String(Base64.decode(response.toString(), Base64.DEFAULT));
-                    Log.d(TAG, "getPermissions() :: permissions: " + results);
+                    //Log.d(TAG, "getPermissions() :: permissions: " + results);
 
                     patientPermissions = getPermissionsBinary(Integer.parseInt(results));
-                    Log.d(TAG, "getPermissions() :: permissionsBinary: " + patientPermissions);
+                    //Log.d(TAG, "getPermissions() :: permissionsBinary: " + patientPermissions);
 
                     break;
                 case 401:
@@ -1295,7 +1295,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An exception occurred...", e);
+            //Log.e(TAG, "An exception occurred...", e);
         }
         return responseCode;
     }
@@ -1328,7 +1328,7 @@ public class TherapistUploadActivity extends AppCompatActivity implements Adapte
                     setAuthenticatedRecordTypes(patientPermissions);
                     break;
                 case 401:
-                    Log.d(TAG, "GetPermissionsTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                    //Log.d(TAG, "GetPermissionsTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                     Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                             Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
