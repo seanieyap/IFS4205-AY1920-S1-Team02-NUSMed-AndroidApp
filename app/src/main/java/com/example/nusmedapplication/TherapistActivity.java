@@ -128,17 +128,17 @@ public class TherapistActivity extends AppCompatActivity {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             String credentialsString = jwt + ":" + deviceID;
-            Log.d(TAG, "getPatients() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "getPatients() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
-            Log.d(TAG, "getPatients() :: Authorization: Bearer " + encodedCredentialsString);
+            //Log.d(TAG, "getPatients() :: Authorization: Bearer " + encodedCredentialsString);
             conn.connect();
 
             responseCode = conn.getResponseCode();
-            Log.d(TAG, "getPatients() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "getPatients() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -152,7 +152,7 @@ public class TherapistActivity extends AppCompatActivity {
                     in.close();
 
                     String results = new String(Base64.decode(response.toString(), Base64.DEFAULT));
-                    Log.d(TAG, "getPatients() :: patients: " + results);
+                    //Log.d(TAG, "getPatients() :: patients: " + results);
                     MY_PATIENTS = results.split("\r");
 
                     break;
@@ -167,7 +167,7 @@ public class TherapistActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An exception occurred...", e);
+            //Log.e(TAG, "An exception occurred...", e);
         }
 
         return responseCode;
@@ -226,7 +226,7 @@ public class TherapistActivity extends AppCompatActivity {
             if (responseCode == 200) {
                 getTherapistUploadPage();
             } else {
-                Log.d(TAG, "UpdateJwtTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                //Log.d(TAG, "UpdateJwtTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);

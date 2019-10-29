@@ -29,7 +29,7 @@ public class UtilityFunctions {
         boolean authenticated = false;
 
         String newJwt = authHeader.substring(7);
-        Log.d(TAG, "validateResponseAuth() :: newJwt: " + newJwt);
+        //Log.d(TAG, "validateResponseAuth() :: newJwt: " + newJwt);
 
         // Separate JWT into header, claims and signature
         String[] newJwtParts = newJwt.split("\\.");
@@ -59,7 +59,7 @@ public class UtilityFunctions {
      */
     public static String getJwtFromHeader(String authHeader) {
         String newJwt = authHeader.substring(7);
-        Log.d(TAG, "getJwt() :: newJwt: " + newJwt);
+        //Log.d(TAG, "getJwt() :: newJwt: " + newJwt);
 
         return newJwt;
     }
@@ -124,17 +124,17 @@ public class UtilityFunctions {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             String credentialsString = jwt + ":" + deviceID;
-            Log.d(TAG, "updateJwt() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "updateJwt() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
-            Log.d(TAG, "updateJwt() :: Authorization: Bearer " + encodedCredentialsString);
+            //Log.d(TAG, "updateJwt() :: Authorization: Bearer " + encodedCredentialsString);
             conn.connect();
 
             responseCode = conn.getResponseCode();
-            Log.d(TAG, "updateJwt() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "updateJwt() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -155,7 +155,7 @@ public class UtilityFunctions {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
             // Deal with timeout/ no internet connection
         }
 

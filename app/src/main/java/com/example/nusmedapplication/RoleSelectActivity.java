@@ -56,7 +56,7 @@ public class RoleSelectActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         role = intent.getStringExtra("role");
-        Log.d(TAG, "onCreate() :: Roles: " + role);
+        //Log.d(TAG, "onCreate() :: Roles: " + role);
 
         RoleSelectTask roleSelectTask = new RoleSelectTask();
         roleSelectTask.execute();
@@ -289,17 +289,17 @@ public class RoleSelectActivity extends AppCompatActivity {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             String credentialsString = jwt + ":" + deviceID;
-            Log.d(TAG, "roleSelect() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "roleSelect() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
-            Log.d(TAG, "roleSelect() :: Authorization: Bearer " + encodedCredentialsString);
+            //Log.d(TAG, "roleSelect() :: Authorization: Bearer " + encodedCredentialsString);
             conn.connect();
 
             int responseCode = conn.getResponseCode();
-            Log.d(TAG, "roleSelect() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "roleSelect() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -312,7 +312,7 @@ public class RoleSelectActivity extends AppCompatActivity {
                         UtilityFunctions.storeJwtToPref(getApplicationContext(), newJwt);
 
                         jwtRole = UtilityFunctions.getRolesFromJwt(newJwt);
-                        Log.d(TAG, "roleSelect() :: Roles: " + jwtRole);
+                        //Log.d(TAG, "roleSelect() :: Roles: " + jwtRole);
                     }
 
                     break;
@@ -323,7 +323,7 @@ public class RoleSelectActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
             // Deal with timeout/ no internet connection
         }
 
@@ -359,7 +359,7 @@ public class RoleSelectActivity extends AppCompatActivity {
                 role = jwtRole;
                 setButtons(role);
             } else {
-                Log.d(TAG, "RoleSelectTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                //Log.d(TAG, "RoleSelectTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
@@ -393,17 +393,17 @@ public class RoleSelectActivity extends AppCompatActivity {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             String credentialsString = jwt + ":" + deviceID + ":" + newJwtRole;
-            Log.d(TAG, "updateJwtRole() :: credentialsString: " + credentialsString);
+            //Log.d(TAG, "updateJwtRole() :: credentialsString: " + credentialsString);
             String encodedCredentialsString = Base64.encodeToString(
                     credentialsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", "Bearer " + encodedCredentialsString);
-            Log.d(TAG, "updateJwtRole() :: Authorization: Bearer " + encodedCredentialsString);
+            //Log.d(TAG, "updateJwtRole() :: Authorization: Bearer " + encodedCredentialsString);
             conn.connect();
 
             int responseCode = conn.getResponseCode();
-            Log.d(TAG, "updateJwtRole() :: responseCode: " + Integer.toString(responseCode));
+            //Log.d(TAG, "updateJwtRole() :: responseCode: " + Integer.toString(responseCode));
 
             switch (responseCode) {
                 case 200:
@@ -416,7 +416,7 @@ public class RoleSelectActivity extends AppCompatActivity {
                         UtilityFunctions.storeJwtToPref(getApplicationContext(), newJwt);
 
                         jwtRole = UtilityFunctions.getRolesFromJwt(newJwt);
-                        Log.d(TAG, "updateJwtRole() :: Roles: " + jwtRole);
+                        //Log.d(TAG, "updateJwtRole() :: Roles: " + jwtRole);
                     }
 
                     break;
@@ -427,7 +427,7 @@ public class RoleSelectActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "An Exception occurred...", e);
+            //Log.e(TAG, "An Exception occurred...", e);
             // Deal with timeout/ no internet connection
         }
 
@@ -466,7 +466,7 @@ public class RoleSelectActivity extends AppCompatActivity {
                     getTherapistPage();
                 }
             } else {
-                Log.d(TAG, "UpdateJwtRoleTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
+                //Log.d(TAG, "UpdateJwtRoleTask() :: Authentication FAILED! JWT/deviceID might be invalid. Start AUTHENTICATE activity!");
                 Toast.makeText(getBaseContext(), R.string.reauthentication_fail,
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), AuthenticateActivity.class);
