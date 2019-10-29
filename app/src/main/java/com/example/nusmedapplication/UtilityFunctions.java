@@ -22,6 +22,9 @@ import java.security.spec.RSAPublicKeySpec;
 public class UtilityFunctions {
     private static final String TAG = "DEBUG - UtilityFunction";
 
+    /**
+     * Validates the digital signature of the JWT.
+     */
     public static boolean validateResponseAuth(Context ctx, String authHeader) throws Exception {
         boolean authenticated = false;
 
@@ -51,6 +54,9 @@ public class UtilityFunctions {
         return authenticated;
     }
 
+    /**
+     * Retrieves the JWT from the authentication header field.
+     */
     public static String getJwtFromHeader(String authHeader) {
         String newJwt = authHeader.substring(7);
         Log.d(TAG, "getJwt() :: newJwt: " + newJwt);
@@ -58,8 +64,10 @@ public class UtilityFunctions {
         return newJwt;
     }
 
+    /**
+     * Stores the JWT in the encrypted shared preferences.
+     */
     public static void storeJwtToPref(Context ctx, String newJwt) throws Exception {
-        // Store JWT in EncryptedSharedPreferences
         String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
 
         SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
@@ -75,6 +83,9 @@ public class UtilityFunctions {
         editor.apply();
     }
 
+    /**
+     * Retrieves the user's roles from the JWT.
+     */
     public static String getRolesFromJwt(String newJwt) throws Exception {
         // Separate JWT into header, claims and signature
         String[] newJwtParts = newJwt.split("\\.");
@@ -88,6 +99,9 @@ public class UtilityFunctions {
         return jwtObj.getString("Roles");
     }
 
+    /**
+     * Updates the JWT to prevent expiry.
+     */
     public static int updateJwt(Context ctx) {
         int responseCode = 500;
 

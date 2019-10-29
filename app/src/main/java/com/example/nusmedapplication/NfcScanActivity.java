@@ -23,20 +23,11 @@ import androidx.core.content.ContextCompat;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.spec.RSAPublicKeySpec;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.NFC;
@@ -137,18 +128,27 @@ public class NfcScanActivity extends AppCompatActivity {
         // super.onBackPressed();
     }
 
+    /**
+     * Checks and requests for necessary permissions.
+     */
     private void ensurePermissions() {
         if (!checkPermissions()) {
             requestPermissions();
         }
     }
 
+    /**
+     * Checks for necessary permissions.
+     */
     private boolean checkPermissions() {
         int result = ContextCompat.checkSelfPermission(getApplicationContext(), NFC);
         result ^= ContextCompat.checkSelfPermission(getApplicationContext(), CAMERA);
         return result == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Requests for necessary permissions.
+     */
     private void requestPermissions() {
         // Runtime permissions only work API 23 onwards
         ActivityCompat.requestPermissions(this, new String[]{CAMERA, NFC},
@@ -173,6 +173,9 @@ public class NfcScanActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Checks if device supports NFC and is enabled.
+     */
     private void checkNfc() {
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
@@ -196,6 +199,10 @@ public class NfcScanActivity extends AppCompatActivity {
         nfcPendingIntent = PendingIntent.getActivity(this, 0, nfcIntent, 0);
     }
 
+    /**
+     * Retrieves the stored data in the encrypted shared preferences
+     * or from data passed through the previous activity.
+     */
     private void retrieveStoredData() {
         try {
             String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
@@ -230,6 +237,9 @@ public class NfcScanActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Registers the user's deviceID, tokenID with the web server.
+     */
     private boolean register() {
         boolean success = false;
         String deviceID = retrievedDeviceID;
@@ -288,6 +298,9 @@ public class NfcScanActivity extends AppCompatActivity {
         return success;
     }
 
+    /**
+     * AsyncTask to register the user's deviceID, tokenID.
+     */
     private class RegisterTask extends AsyncTask<String, Void, Boolean> {
 
         ProgressDialog progressDialog;
@@ -324,6 +337,10 @@ public class NfcScanActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Authenticates the user's nric, password, deviceID with the web server
+     * and retrieve the returned JWT.
+     */
     private boolean authenticate() {
         boolean authenticated = false;
         String deviceID = retrievedDeviceID;
@@ -377,6 +394,9 @@ public class NfcScanActivity extends AppCompatActivity {
         return authenticated;
     }
 
+    /**
+     * AsyncTask to authenticate the user's nric, password, deviceID.
+     */
     private class AuthenticateTask extends AsyncTask<String, Void, Boolean> {
 
         ProgressDialog progressDialog;
@@ -416,6 +436,10 @@ public class NfcScanActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Authenticates the user's jwt, deviceID, tokenID with the web server for web login
+     * and retrieve the returned JWT.
+     */
     private int weblogin() {
         int responseCode = 500;
         String deviceID = retrievedDeviceID;
@@ -471,6 +495,9 @@ public class NfcScanActivity extends AppCompatActivity {
         return responseCode;
     }
 
+    /**
+     * AsyncTask to authenticate the user's jwt, deviceID, tokenID for web login.
+     */
     private class WebLoginTask extends AsyncTask<String, Void, Integer> {
 
         ProgressDialog progressDialog;
@@ -521,6 +548,10 @@ public class NfcScanActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles scanned emergency patient's tokenID with web server
+     * and retrieve the returned JWT.
+     */
     private int scanPatient() {
         int responseCode = 500;
 
@@ -576,6 +607,9 @@ public class NfcScanActivity extends AppCompatActivity {
         return responseCode;
     }
 
+    /**
+     * AsyncTask to handle scanned emergency patient's tokenID.
+     */
     private class ScanPatientTask extends AsyncTask<String, Void, Integer> {
 
         ProgressDialog progressDialog;

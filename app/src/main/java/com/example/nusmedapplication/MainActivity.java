@@ -45,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Retrieves the stored data in the encrypted shared preferences.
+     */
     private void retrieveStoredData() {
         try {
             String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
@@ -73,6 +76,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Validates the retrieved JWT with the web server.
+     */
     private boolean authenticateJwt() {
         boolean authenticated = false;
         String deviceID = retrievedDeviceID;
@@ -125,6 +131,9 @@ public class MainActivity extends AppCompatActivity {
         return authenticated;
     }
 
+    /**
+     * AsyncTask to validate the retrieved JWT.
+     */
     private class AuthenticateJwtTask extends AsyncTask<String, Void, Boolean> {
 
         ProgressDialog progressDialog;

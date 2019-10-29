@@ -27,19 +27,9 @@ import androidx.core.content.ContextCompat;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.spec.RSAPublicKeySpec;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.NFC;
@@ -72,6 +62,9 @@ public class RoleSelectActivity extends AppCompatActivity {
         roleSelectTask.execute();
     }
 
+    /**
+     * Sets patient or therapist buttons depending on the user's available roles.
+     */
     private void setButtons(String role) {
         Button patientButton = findViewById(R.id.rolePatientButton);
         Button therapistButton = findViewById(R.id.roleTherapistButton);
@@ -195,18 +188,27 @@ public class RoleSelectActivity extends AppCompatActivity {
         // super.onBackPressed();
     }
 
+    /**
+     * Checks and requests for necessary permissions.
+     */
     private void ensurePermissions() {
         if (!checkPermissions()) {
             requestPermissions();
         }
     }
 
+    /**
+     * Checks for necessary permissions.
+     */
     private boolean checkPermissions() {
         int result = ContextCompat.checkSelfPermission(getApplicationContext(), NFC);
         result ^= ContextCompat.checkSelfPermission(getApplicationContext(), CAMERA);
         return result == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Requests for necessary permissions.
+     */
     private void requestPermissions() {
         // Runtime permissions only work API 23 onwards
         ActivityCompat.requestPermissions(this, new String[]{CAMERA, NFC},
@@ -231,6 +233,9 @@ public class RoleSelectActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Checks if device supports NFC and is enabled.
+     */
     private void checkNfc() {
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
@@ -250,12 +255,18 @@ public class RoleSelectActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Calls NfcScanActivity for the purpose of web login.
+     */
     private void callNfcScan() {
         Intent intent = new Intent(getApplicationContext(), NfcScanActivity.class);
         intent.putExtra("scanNfcPurpose", "webLogin");
         startActivity(intent);
     }
 
+    /**
+     * Retrieves all available roles of the user from the web server.
+     */
     private String roleSelect() {
         String jwtRole = null;
 
@@ -319,6 +330,9 @@ public class RoleSelectActivity extends AppCompatActivity {
         return jwtRole;
     }
 
+    /**
+     * AsyncTask to retrieve all available roles of the user.
+     */
     private class RoleSelectTask extends AsyncTask<String, Void, String> {
 
         ProgressDialog progressDialog;
@@ -354,6 +368,9 @@ public class RoleSelectActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Retrieves updated JWT with the updated user roles from the web server.
+     */
     private String updateJwtRole(String newJwtRole) {
         String jwtRole = null;
 
@@ -417,6 +434,9 @@ public class RoleSelectActivity extends AppCompatActivity {
         return jwtRole;
     }
 
+    /**
+     * AsyncTask to retrieve updated JWT with the updated user roles.
+     */
     private class UpdateJwtRoleTask extends AsyncTask<String, Void, String> {
 
         ProgressDialog progressDialog;
